@@ -1,0 +1,100 @@
+x-app-env: &app-env
+  ENVIRONMENT: local
+  OTEL_EXPORTER_OTLP_ENDPOINT: http://otel-collector:4317
+  OTEL_EXPORTER_OTLP_PROTOCOL: grpc
+  REDPANDA_BROKERS: redpanda:9092
+  PAYMENT_SERVICE_URL: http://payment-service:8000
+  INVENTORY_SERVICE_URL: http://inventory-service:8000
+  HTTP_TIMEOUT_SECONDS: "2.0"
+  KAFKA_MAX_RETRIES: "3"
+  LOG_LEVEL: INFO
+
+services:
+  redpanda:
+    image: redpandadata/redpanda:v24.3.9
+    command:
+      - redpanda
+      - start
+      - --overprovisioned
+      - --smp=1
+      - --memory=1G
+      - --reserve-memory=0M
+      - --node-id=0
+      - --check=false
+      - --set
+      - redpanda.auto_create_topics_enabled=true
+      - --kafka-addr
+      - internal://0.0.0.0:9092,external://0.0.0.0:19092
+      - --advertise-kafka-addr
+      - internal://redpanda:9092,external://localhost:19092
+    ports:
+      - "19092:19092"
+      - "19644:9644"
+    healthcheck:
+      test: ["CMD-SHELL", "rpk cluster health --api-urls localhost:9644 | grep -E 'Healthy:.+true'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.117.0
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+
+  payment-service:
+    build:
+      context: .
+      args:
+        SERVICE_MODULE: services.payment.main
+    environment:
+      <<: *app-env
+      SERVICE_NAME: payment-service
+    depends_on:
+      - otel-collector
+
+  inventory-service:
+    build:
+      context: .
+      args:
+        SERVICE_MODULE: services.inventory.main
+    environment:
+      <<: *app-env
+      SERVICE_NAME: inventory-service
+    depends_on:
+      - otel-collector
+
+  checkout-service:
+    build:
+      context: .
+      args:
+        SERVICE_MODULE: services.checkout.main
+    environment:
+      <<: *app-env
+      SERVICE_NAME: checkout-service
+    ports:
+      - "8080:8000"
+    depends_on:
+      - payment-service
+      - inventory-service
+      - redpanda
+      - otel-collector
+
+  ai-fraud-service:
+    build:
+      context: .
+      args:
+        SERVICE_MODULE: services.fraud.main
+    environment:
+      <<: *app-env
+      SERVICE_NAME: ai-fraud-service
+    depends_on:
+      redpanda:
+        condition: service_healthy
+      otel-collector:
+        condition: service_started

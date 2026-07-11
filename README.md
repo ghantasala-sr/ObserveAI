@@ -155,6 +155,28 @@ TRAFFIC_BURST_SIZE=3
 - Logs that include `trace_id`, `span_id`, `order_id`, and safe scenario metadata.
 - Metrics such as `checkout_requests_total`, `payment_failures_total`, and `fraud_high_risk_orders_total`.
 
+## Dashboards
+
+Dashboard plans and tested SQL panel queries are in:
+
+```text
+dashboards/
+```
+
+Start with:
+
+```text
+dashboards/README.md
+```
+
+Included dashboard groups:
+
+- System Overview
+- Checkout Health
+- Payment Health
+- Database and Redis Health
+- Fraud Pipeline
+
 ## V1 Boundary
 
 ObserveAI V1 uses deterministic rules for fraud scoring. It does not require Claude, ChatGPT, OpenAI, or any paid LLM API.

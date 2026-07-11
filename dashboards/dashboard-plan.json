@@ -1,0 +1,49 @@
+{
+  "name": "ObserveAI Dashboard Pack",
+  "version": 1,
+  "dashboards": [
+    {
+      "name": "ObserveAI System Overview",
+      "queries": [
+        "queries/system/service-span-volume.sql",
+        "queries/system/service-latency-percentiles.sql",
+        "queries/system/service-error-spans.sql",
+        "queries/system/top-slow-operations.sql"
+      ]
+    },
+    {
+      "name": "ObserveAI Checkout Health",
+      "queries": [
+        "queries/checkout/checkout-latency-percentiles.sql",
+        "queries/checkout/checkout-status-breakdown.sql",
+        "queries/checkout/checkout-scenarios.sql",
+        "queries/checkout/checkout-db-writes.sql"
+      ]
+    },
+    {
+      "name": "ObserveAI Payment Health",
+      "queries": [
+        "queries/payment/payment-latency-percentiles.sql",
+        "queries/payment/payment-errors.sql",
+        "queries/payment/payment-provider-operation-latency.sql"
+      ]
+    },
+    {
+      "name": "ObserveAI Database And Redis Health",
+      "queries": [
+        "queries/storage/postgres-operation-latency.sql",
+        "queries/storage/postgres-operation-volume.sql",
+        "queries/storage/redis-operation-latency.sql",
+        "queries/storage/redis-operation-volume.sql"
+      ]
+    },
+    {
+      "name": "ObserveAI Fraud Pipeline",
+      "queries": [
+        "queries/fraud/fraud-service-latency.sql",
+        "queries/fraud/fraud-decisions.sql",
+        "queries/fraud/kafka-fraud-events.sql"
+      ]
+    }
+  ]
+}

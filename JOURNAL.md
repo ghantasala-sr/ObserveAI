@@ -288,18 +288,56 @@ Notes / follow-ups:
 
 - Next: build SigNoz dashboards on top of this steady traffic.
 
+## 2026-07-11 - Dashboard Query Pack
+
+Commit: pending until pushed
+
+We added a first ObserveAI dashboard pack under `dashboards/`.
+
+What changed:
+
+- Added `dashboards/README.md`.
+- Added `dashboards/dashboard-plan.json`.
+- Added tested SQL panel queries for:
+  - System Overview
+  - Checkout Health
+  - Payment Health
+  - Database and Redis Health
+  - Fraud Pipeline
+
+Why:
+
+Continuous traffic gives us live telemetry, but dashboards make the system easier to read. The goal is to quickly see service rate, latency, error spans, slow operations, PostgreSQL behavior, Redis behavior, and async fraud pipeline behavior.
+
+Validation:
+
+- Ran every SQL file in `dashboards/queries/*/*.sql` against the local SigNoz ClickHouse store.
+- Verified results for:
+  - service span volume
+  - p50/p90/p99 latency
+  - error span percentage
+  - checkout scenarios
+  - payment errors
+  - PostgreSQL operation latency
+  - Redis operation latency
+  - fraud decisions
+  - Kafka fraud events
+
+Notes / follow-ups:
+
+- Next: create alert definitions for the same signals.
+
 ## Next Best Steps
 
 Recommended next steps:
 
-1. Add SigNoz dashboards.
-2. Add SigNoz alerts.
-3. Add Kafka consumer lag and dead-letter queue scenarios.
-4. Add `notification-service`.
-5. Add `analytics-service`.
-6. Add rules-based recommendation service.
-7. Add a small frontend UI for triggering scenarios.
-8. Later, add SigNoz MCP and build the SRE Sidekick copilot.
+1. Add SigNoz alerts.
+2. Add Kafka consumer lag and dead-letter queue scenarios.
+3. Add `notification-service`.
+4. Add `analytics-service`.
+5. Add rules-based recommendation service.
+6. Add a small frontend UI for triggering scenarios.
+7. Later, add SigNoz MCP and build the SRE Sidekick copilot.
 
 ## Journal Template For Future Work
 

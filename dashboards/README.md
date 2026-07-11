@@ -118,12 +118,16 @@ Recommended panels:
 - `queries/fraud/fraud-service-latency.sql`
 - `queries/fraud/fraud-decisions.sql`
 - `queries/fraud/kafka-fraud-events.sql`
+- `queries/fraud/kafka-consumer-lag.sql`
+- `queries/fraud/fraud-dlq-events.sql`
 
 What to look for:
 
 - `fraud.inference` should spike during `fraud_ai_slow`.
 - `fraud.decision` should include `review` for high-value orders.
 - Kafka publish spans should appear in checkout and fraud services.
+- Consumer lag should rise during `kafka_consumer_slow`.
+- DLQ event count should rise during `poison_message`.
 
 ## How To Create Panels In SigNoz
 

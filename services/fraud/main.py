@@ -1,5 +1,6 @@
 import asyncio
 
+from aiokafka import TopicPartition
 from fastapi import FastAPI
 from opentelemetry.trace import SpanKind, Status, StatusCode
 
@@ -17,6 +18,8 @@ db_pool = None
 
 fraud_requests = meter.create_counter("fraud_requests_total")
 high_risk_orders = meter.create_counter("fraud_high_risk_orders_total")
+dlq_events = meter.create_counter("fraud_dlq_events_total")
+consumer_retries = meter.create_counter("fraud_consumer_retries_total")
 consumer_task: asyncio.Task | None = None
 
 
@@ -35,6 +38,44 @@ def score_order(order_value: float, item_count: int) -> tuple[float, str, str]:
     if risk_score >= 0.45:
         return risk_score, "allow_with_monitoring", "moderate_order_risk"
     return risk_score, "allow", "low_order_risk"
+
+
+def estimate_lag(consumer, message) -> int:
+    topic_partition = TopicPartition(message.topic, message.partition)
+    highwater = consumer.highwater(topic_partition)
+    if highwater is None:
+        return 0
+    return max(int(highwater) - int(message.offset) - 1, 0)
+
+
+async def handle_poison_message(payload: dict, span, order_id: str | None, logger) -> None:
+    error_message = "simulated poison fraud message"
+    for attempt in range(1, 4):
+        consumer_retries.add(1, {"scenario": "poison_message"})
+        with tracer.start_as_current_span("fraud.poison_retry") as retry_span:
+            retry_span.set_attribute("order_id", order_id or "")
+            retry_span.set_attribute("retry.attempt", attempt)
+            retry_span.set_status(Status(StatusCode.ERROR, error_message))
+            await asyncio.sleep(0.25 * attempt)
+
+    dlq_payload = {
+        "order_id": order_id,
+        "user_id": payload.get("user_id"),
+        "scenario": payload.get("scenario"),
+        "error": error_message,
+        "source_topic": "fraud.check.requested",
+        "dlq_topic": "fraud.check.dlq",
+        "retry_attempts": 3,
+    }
+    dlq_events.add(1, {"scenario": "poison_message"})
+    span.set_attribute("messaging.dlq_topic", "fraud.check.dlq")
+    span.set_attribute("retry.attempts", 3)
+    span.set_status(Status(StatusCode.ERROR, error_message))
+    await publish_event("fraud.check.dlq", dlq_payload, tracer, logger, order_id=order_id)
+    logger.error(
+        "fraud message sent to dlq",
+        extra={"order_id": order_id, "scenario": "poison_message", "error_type": "PoisonMessage"},
+    )
 
 
 async def consume_fraud_requests():
@@ -58,9 +99,19 @@ async def consume_fraud_requests():
                 },
             ) as span:
                 try:
+                    lag = estimate_lag(consumer, message)
+                    span.set_attribute("kafka.consumer.lag_estimate", lag)
+                    span.set_attribute("messaging.kafka.partition", message.partition)
+                    span.set_attribute("messaging.kafka.offset", message.offset)
                     fraud_requests.add(1)
                     if payload.get("scenario") == "fraud_ai_slow":
                         await asyncio.sleep(1.5)
+                    if payload.get("scenario") == "kafka_consumer_slow":
+                        await asyncio.sleep(5.0)
+                    if payload.get("scenario") == "poison_message":
+                        await handle_poison_message(payload, span, order_id, logger)
+                        await consumer.commit()
+                        continue
 
                     risk_score, decision, reason = score_order(
                         float(payload.get("order_value", 0)),

@@ -98,7 +98,7 @@ run_cart_checkout() {
 }
 
 for index in $(seq 1 "$TOTAL_REQUESTS"); do
-  case $((index % 10)) in
+  case $((index % 12)) in
     0)
       run_checkout "$index" "payment_fail" "249.0" "1" "502"
       ;;
@@ -128,6 +128,12 @@ for index in $(seq 1 "$TOTAL_REQUESTS"); do
       ;;
     9)
       run_checkout "$index" "payment_slow" "540.0" "3" "200"
+      ;;
+    10)
+      run_checkout "$index" "kafka_consumer_slow" "999.0" "4" "200"
+      ;;
+    11)
+      run_checkout "$index" "poison_message" "459.0" "2" "200"
       ;;
   esac
 done

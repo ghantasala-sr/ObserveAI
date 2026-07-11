@@ -48,6 +48,8 @@ Important:
 | PostgreSQL slow query p99 high | `queries/postgres-slow-query-p99.sql` | `value > 500` ms | Warning | Database path is slow. |
 | Redis operation p99 high | `queries/redis-p99-latency.sql` | `value > 50` ms | Warning | Cart/cache path is slow. |
 | Fraud AI p99 latency high | `queries/fraud-ai-p99-latency.sql` | `value > 500` ms | Warning | AI inference is slowing the fraud pipeline. |
+| Fraud Kafka consumer lag high | `queries/kafka-fraud-consumer-lag.sql` | `value > 20` messages | Warning | Fraud consumer is falling behind. |
+| Fraud DLQ events detected | `queries/fraud-dlq-events.sql` | `value > 0` events | Critical | Fraud messages are failing after retries. |
 | ObserveAI telemetry silent | `queries/observeai-telemetry-silence.sql` | `value < 50` spans | Critical | Services or traffic generator may be down. |
 
 ## Suggested Alert Messages
@@ -82,6 +84,22 @@ Likely demo causes: payment_slow, payment_fail, or provider_timeout.
 ObserveAI fraud AI inference latency is high.
 Check fraud.inference spans and the Fraud Pipeline dashboard.
 Likely demo cause: fraud_ai_slow.
+```
+
+### Fraud Kafka consumer lag high
+
+```text
+ObserveAI fraud consumer lag is increasing.
+Check the Fraud Pipeline dashboard and fraud.inference spans.
+Likely demo cause: kafka_consumer_slow.
+```
+
+### Fraud DLQ event detected
+
+```text
+ObserveAI fraud message was sent to the DLQ.
+Check kafka publish fraud.check.dlq spans and poison retry spans.
+Likely demo cause: poison_message.
 ```
 
 ## How To Test Alerts

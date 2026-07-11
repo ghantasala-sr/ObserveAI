@@ -46,3 +46,23 @@ curl -fsS -X POST http://localhost:18080/checkout \
     "scenario": "normal",
     "idempotency_key": "smoke-cart-001"
   }'
+
+curl -fsS -X POST http://localhost:18080/checkout \
+  -H "content-type: application/json" \
+  -d '{
+    "user_id": "user_kafka_slow",
+    "amount": 999.0,
+    "items": [{"product_id": "monitor", "quantity": 4}],
+    "scenario": "kafka_consumer_slow",
+    "idempotency_key": "smoke-kafka-slow-001"
+  }'
+
+curl -fsS -X POST http://localhost:18080/checkout \
+  -H "content-type: application/json" \
+  -d '{
+    "user_id": "user_poison",
+    "amount": 459.0,
+    "items": [{"product_id": "speaker", "quantity": 2}],
+    "scenario": "poison_message",
+    "idempotency_key": "smoke-poison-001"
+  }'

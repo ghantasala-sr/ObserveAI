@@ -101,6 +101,8 @@ Use the `scenario` field to create useful observability signals:
 | `provider_timeout` | Simulated provider timeout-style failure. |
 | `inventory_fail` | Inventory returns 409 out-of-stock. |
 | `fraud_ai_slow` | Checkout succeeds, async fraud consumer is slow. |
+| `kafka_consumer_slow` | Checkout succeeds, fraud Kafka consumer intentionally falls behind. |
+| `poison_message` | Checkout succeeds, fraud consumer retries and sends message to DLQ. |
 | `db_slow` | Checkout succeeds with an intentionally slow DB step. |
 
 ## Smoke Test
@@ -150,6 +152,8 @@ TRAFFIC_BURST_SIZE=3
 - A checkout trace with HTTP spans for inventory and payment.
 - Kafka producer span from checkout to `fraud.check.requested`.
 - Kafka consumer span in `ai-fraud-service`.
+- Kafka consumer lag estimate on `fraud.inference` spans.
+- DLQ publish spans for `fraud.check.dlq` during poison-message scenarios.
 - PostgreSQL order writes and fraud-result writes.
 - Redis cart cache hit/miss spans.
 - Logs that include `trace_id`, `span_id`, `order_id`, and safe scenario metadata.
@@ -200,6 +204,8 @@ Included V1 alert signals:
 - PostgreSQL slow query p99 latency
 - Redis/cache p99 latency
 - Fraud AI p99 latency
+- Fraud Kafka consumer lag
+- Fraud DLQ events
 - ObserveAI telemetry silence
 
 ## V1 Boundary

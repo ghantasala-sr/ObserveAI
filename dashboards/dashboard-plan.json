@@ -42,7 +42,9 @@
       "queries": [
         "queries/fraud/fraud-service-latency.sql",
         "queries/fraud/fraud-decisions.sql",
-        "queries/fraud/kafka-fraud-events.sql"
+        "queries/fraud/kafka-fraud-events.sql",
+        "queries/fraud/kafka-consumer-lag.sql",
+        "queries/fraud/fraud-dlq-events.sql"
       ]
     }
   ]

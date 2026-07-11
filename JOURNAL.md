@@ -389,7 +389,7 @@ Why:
 Validation:
 
 - Ran every SQL file in `alerts/queries/*.sql` against the local SigNoz ClickHouse store.
-- Verified all alert queries return a scalar `value`.
+- Verified all alert queries return a `value` column.
 - Example live values during demo traffic:
   - checkout error rate around 43%
   - checkout p99 around 1.3s
@@ -403,8 +403,6 @@ Notes / follow-ups:
 
 - Next: manually create the first 2 or 3 SigNoz alert rules from the alert pack.
 - Start with checkout p99 latency, checkout error rate, and payment provider error rate.
-
-## Next Best Steps
 
 ## 2026-07-11 - Alert Query Time-Series Fix
 
@@ -431,10 +429,56 @@ Notes / follow-ups:
 
 - Recreate or edit the checkout p99 alert with the updated query from `alerts/queries/checkout-p99-latency.sql`.
 
+## 2026-07-11 - Kafka Lag And DLQ Scenarios
+
+Commit: pending until pushed
+
+What changed:
+
+- Added two new demo scenarios:
+  - `kafka_consumer_slow`
+  - `poison_message`
+- Updated `traffic-generator` and smoke tests to create both scenarios.
+- Enhanced `ai-fraud-service` Kafka consumption:
+  - estimates consumer lag on `fraud.inference` spans
+  - simulates slow Kafka consumer processing
+  - simulates poison-message retries
+  - publishes failed poison messages to `fraud.check.dlq`
+- Added dashboard queries:
+  - `dashboards/queries/fraud/kafka-consumer-lag.sql`
+  - `dashboards/queries/fraud/fraud-dlq-events.sql`
+- Added alert queries:
+  - `alerts/queries/kafka-fraud-consumer-lag.sql`
+  - `alerts/queries/fraud-dlq-events.sql`
+- Updated README, dashboard docs, alert docs, and dashboard plan.
+
+Why:
+
+- Enterprise systems often fail asynchronously, not only inside direct HTTP request/response paths.
+- Kafka lag and dead-letter queues are core observability concepts for event-driven systems.
+- This gives ObserveAI a realistic async failure story: checkout succeeds, but fraud processing falls behind or sends bad messages to DLQ.
+
+Validation:
+
+- Rebuilt and restarted changed services with Docker Compose.
+- Verified traffic generator emits `kafka_consumer_slow` and `poison_message`.
+- Verified fraud consumer logs show delayed processing and DLQ publishing.
+- Ran `tests/smoke_test.sh` successfully.
+- Ran new SigNoz ClickHouse queries and confirmed:
+  - fraud consumer lag estimate reached `8`
+  - fraud DLQ events reached `3`
+
+Notes / follow-ups:
+
+- Add the new panels to the `ObserveAI Fraud Pipeline` dashboard.
+- Optional next step: add a dedicated notification-service consumer and analytics-service consumer.
+
+## Next Best Steps
+
 Recommended next steps:
 
-1. Manually create the first SigNoz alerts from `alerts/README.md`.
-2. Add Kafka consumer lag and dead-letter queue scenarios.
+1. Add the Kafka lag and DLQ panels to the Fraud Pipeline dashboard.
+2. Create the Kafka consumer lag and DLQ alerts from `alerts/README.md`.
 3. Add `notification-service`.
 4. Add `analytics-service`.
 5. Add rules-based recommendation service.

@@ -1,9 +1,7 @@
 SELECT
-  toStartOfMinute(timestamp) AS timestamp,
+  toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS ts,
   serviceName,
-  countIf(status_code = 2) AS error_spans,
-  count() AS total_spans,
-  round(error_spans / total_spans * 100, 2) AS error_span_percent
+  toFloat64(round(countIf(status_code = 2) / count() * 100, 2)) AS value
 FROM signoz_traces.distributed_signoz_index_v3
 WHERE timestamp >= now() - INTERVAL 15 MINUTE
   AND serviceName IN (
@@ -12,5 +10,5 @@ WHERE timestamp >= now() - INTERVAL 15 MINUTE
     'payment-service',
     'ai-fraud-service'
   )
-GROUP BY timestamp, serviceName
-ORDER BY timestamp ASC, serviceName ASC;
+GROUP BY ts, serviceName
+ORDER BY ts ASC, serviceName ASC;

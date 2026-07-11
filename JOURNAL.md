@@ -327,6 +327,41 @@ Notes / follow-ups:
 
 - Next: create alert definitions for the same signals.
 
+## 2026-07-11 - SigNoz Time-Series Dashboard Fix
+
+Commit: pending until pushed
+
+What changed:
+
+- Updated time-series dashboard SQL files to use a SigNoz-friendly shape:
+  - `ts` for the time bucket
+  - a series label like `serviceName` or `operation`
+  - `value` for the numeric value being plotted
+- Fixed remaining queries that grouped by the raw `timestamp` instead of the time bucket alias.
+- Added a known-good SigNoz smoke query to `dashboards/README.md`.
+
+Why:
+
+- SigNoz ClickHouse panels were showing `No Data` even though telemetry existed in ClickHouse.
+- Direct validation showed fresh ObserveAI spans were present, so the problem was dashboard query formatting rather than ingestion.
+
+Validation:
+
+- Confirmed fresh spans in the SigNoz ClickHouse trace table for:
+  - `checkout-service`
+  - `inventory-service`
+  - `payment-service`
+  - `traffic-generator`
+  - `ai-fraud-service`
+  - `cart-service`
+- Ran every SQL file in `dashboards/queries/*/*.sql` against the local SigNoz ClickHouse store.
+- Verified all dashboard queries return rows.
+
+Notes / follow-ups:
+
+- In SigNoz, paste the known-good time-series smoke query, choose Time Series, then click **Stage & Run Query**.
+- If the time-series panel still says `No Data`, run the table sanity query from `dashboards/README.md` to prove data exists.
+
 ## Next Best Steps
 
 Recommended next steps:

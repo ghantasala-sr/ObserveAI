@@ -1,9 +1,7 @@
 SELECT
-  toStartOfMinute(timestamp) AS timestamp,
-  serviceName,
-  name AS operation,
-  count() AS spans,
-  round(quantile(0.99)(duration_nano / 1000000), 2) AS p99_ms
+  toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS ts,
+  concat(serviceName, ' ', name) AS series,
+  toFloat64(count()) AS value
 FROM signoz_traces.distributed_signoz_index_v3
 WHERE timestamp >= now() - INTERVAL 15 MINUTE
   AND name IN (
@@ -11,5 +9,5 @@ WHERE timestamp >= now() - INTERVAL 15 MINUTE
     'kafka publish fraud.check.completed',
     'fraud.inference'
   )
-GROUP BY timestamp, serviceName, operation
-ORDER BY timestamp ASC, serviceName ASC, operation ASC;
+GROUP BY ts, serviceName, name
+ORDER BY ts ASC, serviceName ASC, name ASC;

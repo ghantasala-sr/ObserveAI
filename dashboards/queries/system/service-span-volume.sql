@@ -1,7 +1,7 @@
 SELECT
-  toStartOfMinute(timestamp) AS timestamp,
+  toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS ts,
   serviceName,
-  count() AS spans
+  toFloat64(count()) AS value
 FROM signoz_traces.distributed_signoz_index_v3
 WHERE timestamp >= now() - INTERVAL 15 MINUTE
   AND serviceName IN (
@@ -12,5 +12,5 @@ WHERE timestamp >= now() - INTERVAL 15 MINUTE
     'payment-service',
     'ai-fraud-service'
   )
-GROUP BY timestamp, serviceName
-ORDER BY timestamp ASC, serviceName ASC;
+GROUP BY ts, serviceName
+ORDER BY ts ASC, serviceName ASC;

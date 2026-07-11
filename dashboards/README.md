@@ -30,6 +30,20 @@ Use time range:
 Last 15 minutes
 ```
 
+Before creating a panel, confirm data exists:
+
+```sql
+SELECT
+  serviceName,
+  toFloat64(count()) AS value
+FROM signoz_traces.distributed_signoz_index_v3
+WHERE timestamp >= now() - INTERVAL 15 MINUTE
+GROUP BY serviceName
+ORDER BY value DESC;
+```
+
+Show this as a Table panel. If this query returns rows, SigNoz has data and any empty time-series panel is a panel/query-shape issue.
+
 ## Dashboard 1: ObserveAI System Overview
 
 Goal: understand global service health.
@@ -128,9 +142,33 @@ What to look for:
 
 Important:
 
-- Time series queries must return a column named `timestamp`.
-- Queries that do not return `timestamp` should be shown as Table, Bar, or Value panels.
+- For ClickHouse time-series panels, use queries that return:
+  - `ts`: the time bucket
+  - one label column, for example `serviceName`
+  - `value`: the numeric value to plot
+- Queries that do not return `ts` and `value` should be shown as Table, Bar, or Value panels.
 - If you see `No Data`, first click **Stage & Run Query**, then check the panel type.
+
+Known-good time-series smoke query:
+
+```sql
+SELECT
+  toStartOfInterval(timestamp, INTERVAL 1 MINUTE) AS ts,
+  serviceName,
+  toFloat64(count()) AS value
+FROM signoz_traces.distributed_signoz_index_v3
+WHERE timestamp >= now() - INTERVAL 15 MINUTE
+  AND serviceName IN (
+    'traffic-generator',
+    'checkout-service',
+    'cart-service',
+    'inventory-service',
+    'payment-service',
+    'ai-fraud-service'
+  )
+GROUP BY ts, serviceName
+ORDER BY ts ASC, serviceName ASC;
+```
 
 ## Notes
 

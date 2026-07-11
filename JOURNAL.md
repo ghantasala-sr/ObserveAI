@@ -406,6 +406,31 @@ Notes / follow-ups:
 
 ## Next Best Steps
 
+## 2026-07-11 - Alert Query Time-Series Fix
+
+Commit: pending until pushed
+
+What changed:
+
+- Updated all alert ClickHouse queries to return:
+  - `interval`
+  - `value`
+- Updated `alerts/README.md` to document this shape.
+
+Why:
+
+- Scalar alert queries returned a valid number in ClickHouse, but SigNoz alert rule charts need a time-series result to render and evaluate clearly.
+- SigNoz alert docs describe alert ClickHouse queries as returning both `value` and an `interval` column for time-series evaluation.
+
+Validation:
+
+- Ran every SQL file in `alerts/queries/*.sql` against the local SigNoz ClickHouse store.
+- Verified each query returns multiple recent time buckets with visible values.
+
+Notes / follow-ups:
+
+- Recreate or edit the checkout p99 alert with the updated query from `alerts/queries/checkout-p99-latency.sql`.
+
 Recommended next steps:
 
 1. Manually create the first SigNoz alerts from `alerts/README.md`.

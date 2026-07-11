@@ -30,6 +30,13 @@ signoz_traces.distributed_signoz_index_v3
 8. Evaluate every 1 minute.
 9. Require the condition for 3 to 5 minutes before firing.
 
+Important:
+
+- SigNoz alert ClickHouse queries should return:
+  - `interval`: the time bucket
+  - `value`: the numeric value to evaluate
+- If the chart is blank, first make sure your query returns both `interval` and `value`.
+
 ## Recommended V1 Alerts
 
 | Alert | Query file | Threshold | Severity | Why it matters |
@@ -102,6 +109,7 @@ Then watch:
 ## Alert Design Notes
 
 - V1 alerts intentionally use simple thresholds.
+- The queries return a time series with `interval` and `value` because SigNoz alert rules evaluate time-series results.
 - In real production, thresholds should be tuned using baseline traffic.
 - Prefer user-impact alerts first: checkout latency and checkout failures.
 - Infrastructure alerts are useful, but they should not page people unless they affect user-facing workflows.

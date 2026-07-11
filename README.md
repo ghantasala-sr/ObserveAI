@@ -8,6 +8,8 @@ This version is intentionally not an AI copilot yet. First we build the system t
 
 - FastAPI checkout, payment, inventory, and rules-based AI fraud services.
 - Redpanda as a Kafka-compatible broker.
+- PostgreSQL for ObserveAI orders and fraud results.
+- Redis for cart/cache state.
 - OpenTelemetry traces, metrics, and logs.
 - Trace context propagation across HTTP and Kafka headers.
 - Privacy-safe structured JSON logs with trace and span ids.
@@ -21,8 +23,10 @@ Client
   |
   v
 checkout-service
+  |----> cart-service -> Redis
   |----> inventory-service
   |----> payment-service
+  |----> PostgreSQL orders
   |
   v
 Redpanda topic: fraud.check.requested
@@ -56,6 +60,12 @@ The checkout API is exposed at:
 http://localhost:18080
 ```
 
+The cart API is exposed at:
+
+```text
+http://localhost:18081
+```
+
 ## Try A Normal Checkout
 
 ```bash
@@ -82,6 +92,7 @@ Use the `scenario` field to create useful observability signals:
 | `provider_timeout` | Simulated provider timeout-style failure. |
 | `inventory_fail` | Inventory returns 409 out-of-stock. |
 | `fraud_ai_slow` | Checkout succeeds, async fraud consumer is slow. |
+| `db_slow` | Checkout succeeds with an intentionally slow DB step. |
 
 ## Smoke Test
 
@@ -104,9 +115,12 @@ TOTAL_REQUESTS=150 bash tests/big_smoke_test.sh
 ## What To Look For In SigNoz
 
 - Services: `checkout-service`, `payment-service`, `inventory-service`, `ai-fraud-service`.
+- Additional services: `cart-service`, PostgreSQL spans, Redis spans.
 - A checkout trace with HTTP spans for inventory and payment.
 - Kafka producer span from checkout to `fraud.check.requested`.
 - Kafka consumer span in `ai-fraud-service`.
+- PostgreSQL order writes and fraud-result writes.
+- Redis cart cache hit/miss spans.
 - Logs that include `trace_id`, `span_id`, `order_id`, and safe scenario metadata.
 - Metrics such as `checkout_requests_total`, `payment_failures_total`, and `fraud_high_risk_orders_total`.
 

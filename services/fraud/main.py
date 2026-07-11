@@ -3,6 +3,7 @@ import asyncio
 from fastapi import FastAPI
 from opentelemetry.trace import SpanKind, Status, StatusCode
 
+from shared.observeai.db import connect_with_retry, execute_db, init_schema
 from shared.observeai.kafka import extract_context, make_consumer, publish_event
 from shared.observeai.logging import configure_logging
 from shared.observeai.telemetry import setup_telemetry
@@ -12,6 +13,7 @@ SERVICE_NAME = "ai-fraud-service"
 app = FastAPI(title="ObserveAI AI Fraud Service")
 tracer, meter = setup_telemetry(SERVICE_NAME, app)
 logger = configure_logging(SERVICE_NAME)
+db_pool = None
 
 fraud_requests = meter.create_counter("fraud_requests_total")
 high_risk_orders = meter.create_counter("fraud_high_risk_orders_total")
@@ -81,6 +83,28 @@ async def consume_fraud_requests():
                         "fraud check completed",
                         extra={"order_id": order_id, "decision": decision, "risk_score": result["risk_score"]},
                     )
+                    if db_pool:
+                        await execute_db(
+                            db_pool,
+                            tracer,
+                            "upsert_fraud_result",
+                            """
+                            INSERT INTO fraud_results(order_id, user_id, risk_score, decision, reason, model_version)
+                            VALUES($1, $2, $3, $4, $5, $6)
+                            ON CONFLICT(order_id) DO UPDATE
+                            SET risk_score = EXCLUDED.risk_score,
+                                decision = EXCLUDED.decision,
+                                reason = EXCLUDED.reason,
+                                model_version = EXCLUDED.model_version,
+                                created_at = now()
+                            """,
+                            result["order_id"],
+                            result["user_id"],
+                            result["risk_score"],
+                            result["decision"],
+                            result["reason"],
+                            result["model_version"],
+                        )
                     await publish_event("fraud.check.completed", result, tracer, logger, order_id=order_id)
                     await consumer.commit()
                 except Exception as exc:
@@ -95,6 +119,9 @@ async def consume_fraud_requests():
 @app.on_event("startup")
 async def startup():
     global consumer_task
+    global db_pool
+    db_pool = await connect_with_retry()
+    await init_schema(db_pool)
     consumer_task = asyncio.create_task(consume_fraud_requests())
 
 
@@ -102,6 +129,8 @@ async def startup():
 async def shutdown():
     if consumer_task:
         consumer_task.cancel()
+    if db_pool:
+        await db_pool.close()
 
 
 @app.get("/health")

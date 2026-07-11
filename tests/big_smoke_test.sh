@@ -14,6 +14,21 @@ done
 curl -fsS "$BASE_URL/health"
 echo
 
+CART_URL="${CART_URL:-http://localhost:18081}"
+curl -fsS "$CART_URL/health" >/dev/null
+
+for user_index in $(seq 0 9); do
+  curl -fsS -X POST "$CART_URL/cart" \
+    -H "content-type: application/json" \
+    -d "{
+      \"user_id\": \"cart_load_user_$user_index\",
+      \"items\": [
+        {\"product_id\": \"cart_item_$user_index\", \"quantity\": 1},
+        {\"product_id\": \"addon_$user_index\", \"quantity\": 2}
+      ]
+    }" >/dev/null
+done
+
 success=0
 expected_failures=0
 unexpected=0
@@ -54,6 +69,34 @@ run_checkout() {
   fi
 }
 
+run_cart_checkout() {
+  local index="$1"
+  local user_id="cart_load_user_$((index % 10))"
+  local status
+
+  status=$(
+    curl -sS -o /tmp/observeai-big-smoke-response.json -w "%{http_code}" \
+      -X POST "$BASE_URL/checkout" \
+      -H "content-type: application/json" \
+      -d "{
+        \"user_id\": \"$user_id\",
+        \"amount\": 199.0,
+        \"scenario\": \"normal\",
+        \"idempotency_key\": \"big-smoke-cart-$index\"
+      }"
+  )
+
+  if [[ "$status" == "200" ]]; then
+    success=$((success + 1))
+    printf "ok     cart-%03d user=%-18s status=%s\n" "$index" "$user_id" "$status"
+  else
+    unexpected=$((unexpected + 1))
+    printf "bad    cart-%03d expected=200 actual=%s response=" "$index" "$status"
+    cat /tmp/observeai-big-smoke-response.json
+    echo
+  fi
+}
+
 for index in $(seq 1 "$TOTAL_REQUESTS"); do
   case $((index % 10)) in
     0)
@@ -72,7 +115,7 @@ for index in $(seq 1 "$TOTAL_REQUESTS"); do
       run_checkout "$index" "inventory_fail" "179.0" "1" "409"
       ;;
     5)
-      run_checkout "$index" "normal" "799.0" "1" "200"
+      run_checkout "$index" "db_slow" "799.0" "1" "200"
       ;;
     6)
       run_checkout "$index" "provider_timeout" "629.0" "2" "502"
@@ -87,6 +130,10 @@ for index in $(seq 1 "$TOTAL_REQUESTS"); do
       run_checkout "$index" "payment_slow" "540.0" "3" "200"
       ;;
   esac
+done
+
+for index in $(seq 1 20); do
+  run_cart_checkout "$index"
 done
 
 echo

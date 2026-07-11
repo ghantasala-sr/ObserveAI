@@ -9,6 +9,14 @@ for _ in {1..30}; do
 done
 
 curl -fsS http://localhost:18080/health
+curl -fsS http://localhost:18081/health
+
+curl -fsS -X POST http://localhost:18081/cart \
+  -H "content-type: application/json" \
+  -d '{
+    "user_id": "cart_user_smoke",
+    "items": [{"product_id": "keyboard", "quantity": 1}]
+  }'
 
 curl -fsS -X POST http://localhost:18080/checkout \
   -H "content-type: application/json" \
@@ -28,4 +36,13 @@ curl -fsS -X POST http://localhost:18080/checkout \
     "items": [{"product_id": "camera", "quantity": 6}],
     "scenario": "fraud_ai_slow",
     "idempotency_key": "smoke-002"
+  }'
+
+curl -fsS -X POST http://localhost:18080/checkout \
+  -H "content-type: application/json" \
+  -d '{
+    "user_id": "cart_user_smoke",
+    "amount": 129.0,
+    "scenario": "normal",
+    "idempotency_key": "smoke-cart-001"
   }'

@@ -43,9 +43,6 @@ services:
       - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    ports:
-      - "4317:4317"
-      - "4318:4318"
 
   payment-service:
     build:
@@ -78,7 +75,7 @@ services:
       <<: *app-env
       SERVICE_NAME: checkout-service
     ports:
-      - "8080:8000"
+      - "18080:8000"
     depends_on:
       - payment-service
       - inventory-service

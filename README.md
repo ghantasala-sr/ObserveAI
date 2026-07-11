@@ -41,7 +41,7 @@ All services -> OpenTelemetry Collector -> SigNoz
 - Docker Desktop with at least 4 GB memory available.
 - SigNoz running locally with OTLP/gRPC available on `localhost:4317`.
 
-Current SigNoz self-hosted Docker installs use Foundry. Start SigNoz separately from this app, then run ObserveAI. See the official SigNoz Docker guide: https://signoz.io/docs/install/docker/
+Current SigNoz self-hosted Docker installs use Foundry. Start SigNoz separately from this app, then run ObserveAI. ObserveAI keeps its collector internal and exposes checkout on `18080`, so SigNoz can keep its normal OTLP and UI ports. See the official SigNoz Docker guide: https://signoz.io/docs/install/docker/
 
 ## Run
 
@@ -53,13 +53,13 @@ docker compose up --build
 The checkout API is exposed at:
 
 ```text
-http://localhost:8080
+http://localhost:18080
 ```
 
 ## Try A Normal Checkout
 
 ```bash
-curl -X POST http://localhost:8080/checkout \
+curl -X POST http://localhost:18080/checkout \
   -H "content-type: application/json" \
   -d '{
     "user_id": "user_123",

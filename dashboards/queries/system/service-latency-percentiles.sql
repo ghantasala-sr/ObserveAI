@@ -1,5 +1,5 @@
 SELECT
-  toStartOfMinute(timestamp) AS minute,
+  toStartOfMinute(timestamp) AS timestamp,
   serviceName,
   round(quantile(0.50)(duration_nano / 1000000), 2) AS p50_ms,
   round(quantile(0.90)(duration_nano / 1000000), 2) AS p90_ms,
@@ -14,5 +14,5 @@ WHERE timestamp >= now() - INTERVAL 15 MINUTE
     'payment-service',
     'ai-fraud-service'
   )
-GROUP BY minute, serviceName
-ORDER BY minute ASC, serviceName ASC;
+GROUP BY timestamp, serviceName
+ORDER BY timestamp ASC, serviceName ASC;

@@ -1,5 +1,5 @@
 SELECT
-  toStartOfMinute(timestamp) AS minute,
+  toStartOfMinute(timestamp) AS timestamp,
   serviceName,
   countIf(status_code = 2) AS error_spans,
   count() AS total_spans,
@@ -12,5 +12,5 @@ WHERE timestamp >= now() - INTERVAL 15 MINUTE
     'payment-service',
     'ai-fraud-service'
   )
-GROUP BY minute, serviceName
-ORDER BY minute ASC, serviceName ASC;
+GROUP BY timestamp, serviceName
+ORDER BY timestamp ASC, serviceName ASC;

@@ -119,11 +119,18 @@ What to look for:
 4. Add a panel.
 5. Choose SQL/ClickHouse query mode if available.
 6. Paste one query from this folder.
-7. Pick the panel visualization:
+7. Click **Stage & Run Query**.
+8. Pick the panel visualization:
    - Time series for latency/rate over time.
    - Bar chart/table for breakdowns.
    - Value/stat for totals.
-8. Save the panel.
+9. Save the panel.
+
+Important:
+
+- Time series queries must return a column named `timestamp`.
+- Queries that do not return `timestamp` should be shown as Table, Bar, or Value panels.
+- If you see `No Data`, first click **Stage & Run Query**, then check the panel type.
 
 ## Notes
 

@@ -1,5 +1,5 @@
 SELECT
-  toStartOfMinute(timestamp) AS minute,
+  toStartOfMinute(timestamp) AS timestamp,
   serviceName,
   name AS operation,
   count() AS spans,
@@ -11,5 +11,5 @@ WHERE timestamp >= now() - INTERVAL 15 MINUTE
     'kafka publish fraud.check.completed',
     'fraud.inference'
   )
-GROUP BY minute, serviceName, operation
-ORDER BY minute ASC, serviceName ASC, operation ASC;
+GROUP BY timestamp, serviceName, operation
+ORDER BY timestamp ASC, serviceName ASC, operation ASC;

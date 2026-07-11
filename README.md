@@ -10,6 +10,7 @@ This version is intentionally not an AI copilot yet. First we build the system t
 - Redpanda as a Kafka-compatible broker.
 - PostgreSQL for ObserveAI orders and fraud results.
 - Redis for cart/cache state.
+- Continuous traffic generator for live SigNoz metrics.
 - OpenTelemetry traces, metrics, and logs.
 - Trace context propagation across HTTP and Kafka headers.
 - Privacy-safe structured JSON logs with trace and span ids.
@@ -40,6 +41,8 @@ Redpanda topic: fraud.check.completed
 All services -> OpenTelemetry Collector -> SigNoz
 ```
 
+The `traffic-generator` service continuously calls checkout and cart flows so SigNoz keeps receiving live data.
+
 ## Prerequisites
 
 - Docker Desktop with at least 4 GB memory available.
@@ -52,6 +55,12 @@ Current SigNoz self-hosted Docker installs use Foundry. Start SigNoz separately 
 ```bash
 cp .env.example .env
 docker compose up --build
+```
+
+To run without continuous generated traffic:
+
+```bash
+docker compose up --build --scale traffic-generator=0
 ```
 
 The checkout API is exposed at:
@@ -112,9 +121,31 @@ You can increase or decrease the load:
 TOTAL_REQUESTS=150 bash tests/big_smoke_test.sh
 ```
 
+## Continuous Traffic
+
+By default, Docker Compose starts `traffic-generator`.
+
+It continuously creates:
+
+- normal checkouts
+- slow payment requests
+- payment failures
+- provider timeouts
+- inventory failures
+- slow database requests
+- slow fraud-service requests
+- cart-backed checkouts
+
+Tune the volume in `docker-compose.yml` or `.env`:
+
+```text
+TRAFFIC_INTERVAL_SECONDS=2.0
+TRAFFIC_BURST_SIZE=3
+```
+
 ## What To Look For In SigNoz
 
-- Services: `checkout-service`, `payment-service`, `inventory-service`, `ai-fraud-service`.
+- Services: `checkout-service`, `payment-service`, `inventory-service`, `ai-fraud-service`, `cart-service`, `traffic-generator`.
 - Additional services: `cart-service`, PostgreSQL spans, Redis spans.
 - A checkout trace with HTTP spans for inventory and payment.
 - Kafka producer span from checkout to `fraud.check.requested`.

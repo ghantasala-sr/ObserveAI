@@ -11,6 +11,8 @@ x-app-env: &app-env
   HTTP_TIMEOUT_SECONDS: "2.0"
   KAFKA_MAX_RETRIES: "3"
   LOG_LEVEL: INFO
+  TRAFFIC_INTERVAL_SECONDS: "2.0"
+  TRAFFIC_BURST_SIZE: "3"
 
 services:
   postgres:
@@ -151,6 +153,25 @@ services:
         condition: service_healthy
       redpanda:
         condition: service_healthy
+      otel-collector:
+        condition: service_started
+
+  traffic-generator:
+    build:
+      context: .
+      args:
+        SERVICE_MODULE: services.traffic.main
+    command: ["python", "-m", "services.traffic.main"]
+    environment:
+      <<: *app-env
+      SERVICE_NAME: traffic-generator
+    depends_on:
+      checkout-service:
+        condition: service_started
+      cart-service:
+        condition: service_started
+      ai-fraud-service:
+        condition: service_started
       otel-collector:
         condition: service_started
 

@@ -239,6 +239,55 @@ ObserveAI is now a realistic local observability lab with:
 - Slow latency scenarios
 - Logs, metrics, and traces flowing to SigNoz
 
+## 2026-07-11 - Continuous Traffic Generator
+
+Commit: pending until pushed
+
+We added a `traffic-generator` service so SigNoz has continuous data without manually running smoke tests.
+
+What changed:
+
+- Added `services/traffic`.
+- Added a Docker Compose `traffic-generator` service.
+- Added tunable traffic controls:
+  - `TRAFFIC_INTERVAL_SECONDS`
+  - `TRAFFIC_BURST_SIZE`
+- The generator creates a steady mix of:
+  - normal checkouts
+  - slow payment requests
+  - payment failures
+  - provider timeouts
+  - inventory failures
+  - slow database requests
+  - slow fraud-service requests
+  - cart-backed checkouts
+
+Why:
+
+Observability needs live signals. Without continuous traffic, SigNoz becomes quiet after smoke tests finish. This generator keeps request rate, latency, errors, DB spans, Redis spans, Kafka spans, logs, and service metrics active.
+
+Validation:
+
+- `python3 -m compileall shared services` passed.
+- `docker compose config --quiet` passed.
+- `docker compose up -d --build` started `traffic-generator`.
+- `docker compose ps` showed `observeai-traffic-generator-1` running.
+- Traffic generator logs showed continuous mixed scenarios.
+- SigNoz trace store showed fresh spans in the last 5 minutes:
+
+```text
+checkout-service      134 spans
+inventory-service     105 spans
+payment-service        90 spans
+traffic-generator      38 spans
+ai-fraud-service       36 spans
+cart-service           22 spans
+```
+
+Notes / follow-ups:
+
+- Next: build SigNoz dashboards on top of this steady traffic.
+
 ## Next Best Steps
 
 Recommended next steps:

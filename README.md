@@ -177,6 +177,31 @@ Included dashboard groups:
 - Database and Redis Health
 - Fraud Pipeline
 
+## Alerts
+
+Alert plans and tested ClickHouse alert queries are in:
+
+```text
+alerts/
+```
+
+Start with:
+
+```text
+alerts/README.md
+```
+
+Included V1 alert signals:
+
+- Checkout p99 latency
+- Checkout error rate
+- Payment provider error rate
+- Payment provider p99 latency
+- PostgreSQL slow query p99 latency
+- Redis/cache p99 latency
+- Fraud AI p99 latency
+- ObserveAI telemetry silence
+
 ## V1 Boundary
 
 ObserveAI V1 uses deterministic rules for fraud scoring. It does not require Claude, ChatGPT, OpenAI, or any paid LLM API.
@@ -185,6 +210,5 @@ Later versions can add:
 
 - AI recommendation service.
 - Notification and analytics consumers.
-- Dashboard and alert definitions.
 - SigNoz MCP integration.
 - SRE Sidekick AI copilot on top of the telemetry.

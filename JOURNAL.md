@@ -362,11 +362,53 @@ Notes / follow-ups:
 - In SigNoz, paste the known-good time-series smoke query, choose Time Series, then click **Stage & Run Query**.
 - If the time-series panel still says `No Data`, run the table sanity query from `dashboards/README.md` to prove data exists.
 
+## 2026-07-11 - SigNoz Alert Pack
+
+Commit: pending until pushed
+
+What changed:
+
+- Added `alerts/README.md`.
+- Added tested ClickHouse alert queries under `alerts/queries/`.
+- Covered V1 operational alert signals:
+  - checkout p99 latency
+  - checkout error rate
+  - payment provider error rate
+  - payment provider p99 latency
+  - PostgreSQL slow query p99 latency
+  - Redis operation p99 latency
+  - fraud AI p99 latency
+  - ObserveAI telemetry silence
+- Updated the main `README.md` with the new alert folder.
+
+Why:
+
+- Dashboards help us see system behavior, but alerts teach when a signal is dangerous enough to require action.
+- This makes ObserveAI closer to real enterprise observability: detect, investigate, explain, then fix.
+
+Validation:
+
+- Ran every SQL file in `alerts/queries/*.sql` against the local SigNoz ClickHouse store.
+- Verified all alert queries return a scalar `value`.
+- Example live values during demo traffic:
+  - checkout error rate around 43%
+  - checkout p99 around 1.3s
+  - fraud AI p99 around 1.5s
+  - payment provider p99 around 1.2s
+  - PostgreSQL slow query p99 around 1.1s
+  - Redis p99 below 20ms
+  - telemetry count well above the silence threshold
+
+Notes / follow-ups:
+
+- Next: manually create the first 2 or 3 SigNoz alert rules from the alert pack.
+- Start with checkout p99 latency, checkout error rate, and payment provider error rate.
+
 ## Next Best Steps
 
 Recommended next steps:
 
-1. Add SigNoz alerts.
+1. Manually create the first SigNoz alerts from `alerts/README.md`.
 2. Add Kafka consumer lag and dead-letter queue scenarios.
 3. Add `notification-service`.
 4. Add `analytics-service`.

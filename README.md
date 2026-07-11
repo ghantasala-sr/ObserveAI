@@ -89,6 +89,18 @@ Use the `scenario` field to create useful observability signals:
 bash tests/smoke_test.sh
 ```
 
+For a bigger telemetry run with latency spikes, expected failures, Kafka activity, and AI fraud-service spans:
+
+```bash
+bash tests/big_smoke_test.sh
+```
+
+You can increase or decrease the load:
+
+```bash
+TOTAL_REQUESTS=150 bash tests/big_smoke_test.sh
+```
+
 ## What To Look For In SigNoz
 
 - Services: `checkout-service`, `payment-service`, `inventory-service`, `ai-fraud-service`.

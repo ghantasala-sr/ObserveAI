@@ -43,6 +43,9 @@ services:
       - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"
+    networks:
+      - default
+      - signoz-network
 
   payment-service:
     build:
@@ -95,3 +98,8 @@ services:
         condition: service_healthy
       otel-collector:
         condition: service_started
+
+networks:
+  signoz-network:
+    external: true
+    name: signoz-network

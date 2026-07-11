@@ -15,7 +15,7 @@ processors:
 
 exporters:
   otlp/signoz:
-    endpoint: host.docker.internal:4317
+    endpoint: signoz-ingester:4317
     tls:
       insecure: true
   debug:

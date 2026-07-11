@@ -41,7 +41,7 @@ All services -> OpenTelemetry Collector -> SigNoz
 - Docker Desktop with at least 4 GB memory available.
 - SigNoz running locally with OTLP/gRPC available on `localhost:4317`.
 
-Current SigNoz self-hosted Docker installs use Foundry. Start SigNoz separately from this app, then run ObserveAI. ObserveAI keeps its collector internal and exposes checkout on `18080`, so SigNoz can keep its normal OTLP and UI ports. See the official SigNoz Docker guide: https://signoz.io/docs/install/docker/
+Current SigNoz self-hosted Docker installs use Foundry. Start SigNoz separately from this app, then run ObserveAI. ObserveAI keeps its collector internal, joins the `signoz-network` Docker network, and exposes checkout on `18080`, so SigNoz can keep its normal OTLP and UI ports. See the official SigNoz Docker guide: https://signoz.io/docs/install/docker/
 
 ## Run
 

@@ -616,7 +616,7 @@ Notes / follow-ups:
 
 ## 2026-07-12 - Scenario Flow Simulator In UI
 
-Commit: `bd84027 Animate scenario flows in UI`
+Commit: `3712eaf Animate scenario flows in UI`
 
 What changed:
 

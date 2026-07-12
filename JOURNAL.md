@@ -726,6 +726,9 @@ Notes / follow-ups:
 - `bash scripts/check_mcp.sh` now reports MCP livez as OK.
 - `GET http://localhost:8000/mcp` correctly returns `401` until a SigNoz API key is provided.
 - Added `scripts/check_mcp_auth.sh`, which validates a local `SIGNOZ_API_KEY` without storing or printing the secret.
+- Added `signoz` to user-level Codex MCP config at `~/.codex/config.toml`.
+- Verified with the ChatGPT desktop-bundled Codex binary that `signoz` is enabled as a Streamable HTTP MCP server pointing at `http://localhost:8000/mcp`.
+- Verified the API key and MCP auth header with `bash scripts/check_mcp_auth.sh`.
 - Once connected, try prompts like “Investigate the latest payment_slow scenario” and “Find Kafka lag or DLQ evidence.”
 
 ## Next Best Steps

@@ -527,14 +527,58 @@ Notes / follow-ups:
 - Add the new `ObserveAI Downstream Consumers` dashboard in SigNoz.
 - Consider adding a rules-based recommendation consumer next.
 
+## 2026-07-12 - ObserveAI Web UI And Architecture Map
+
+Commit: pending until pushed
+
+What changed:
+
+- Added `ui-service`.
+- Exposed the UI at `http://localhost:18082`.
+- Added a polished local control room interface with:
+  - service health checks
+  - scenario launcher
+  - architecture map
+  - recent event trail
+  - direct SigNoz link
+- Added UI API endpoints:
+  - `GET /api/services`
+  - `POST /api/cart/seed`
+  - `POST /api/scenarios`
+- Updated Docker Compose to run the UI service.
+- Updated smoke test to check `ui-service` health.
+- Updated README and `.env.example`.
+
+Why:
+
+- ObserveAI needed a human-friendly demo surface instead of only curl commands.
+- The architecture map makes the system easier to explain: UI, checkout, sync dependencies, Kafka, fraud, notification, analytics, storage, and SigNoz.
+- Triggering scenarios from the browser makes it faster to create fresh traces, dashboard changes, and alert conditions.
+
+Validation:
+
+- Built and started `ui-service` with Docker Compose.
+- Confirmed `http://localhost:18082/health` returns healthy.
+- Confirmed the HTML page loads.
+- Confirmed `GET /api/services` returns healthy downstream service statuses.
+- Triggered a `normal` scenario through the UI API successfully.
+- Ran `tests/smoke_test.sh` successfully.
+- Verified `ui-service` spans are landing in SigNoz ClickHouse.
+- Ran `python3 -m compileall services shared` successfully.
+
+Notes / follow-ups:
+
+- Open `http://localhost:18082` and use it as the main demo surface.
+- Next useful improvement: add a small live “last trace/order id” panel or dashboard deep links.
+
 ## Next Best Steps
 
 Recommended next steps:
 
 1. Add the `ObserveAI Downstream Consumers` dashboard in SigNoz.
 2. Create notification and analytics alerts from `alerts/README.md`.
-3. Add a rules-based recommendation service.
-4. Add a small frontend UI for triggering scenarios.
+3. Add dashboard deep links or trace-id helpers to the UI.
+4. Add a rules-based recommendation service.
 5. Later, add SigNoz MCP and build the SRE Sidekick copilot.
 
 ## Journal Template For Future Work

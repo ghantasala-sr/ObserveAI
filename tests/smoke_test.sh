@@ -10,6 +10,7 @@ done
 
 curl -fsS http://localhost:18080/health
 curl -fsS http://localhost:18081/health
+curl -fsS http://localhost:18082/health
 
 curl -fsS -X POST http://localhost:18081/cart \
   -H "content-type: application/json" \

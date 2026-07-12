@@ -192,6 +192,34 @@ services:
       otel-collector:
         condition: service_started
 
+  ui-service:
+    build:
+      context: .
+      args:
+        SERVICE_MODULE: services.ui.main
+    environment:
+      <<: *app-env
+      SERVICE_NAME: ui-service
+    ports:
+      - "18082:8000"
+    depends_on:
+      checkout-service:
+        condition: service_started
+      cart-service:
+        condition: service_started
+      payment-service:
+        condition: service_started
+      inventory-service:
+        condition: service_started
+      ai-fraud-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+      analytics-service:
+        condition: service_started
+      otel-collector:
+        condition: service_started
+
   traffic-generator:
     build:
       context: .
@@ -211,6 +239,8 @@ services:
       notification-service:
         condition: service_started
       analytics-service:
+        condition: service_started
+      ui-service:
         condition: service_started
       otel-collector:
         condition: service_started

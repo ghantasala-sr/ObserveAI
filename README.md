@@ -11,6 +11,7 @@ This version is intentionally not an AI copilot yet. First we build the system t
 - PostgreSQL for ObserveAI orders and fraud results.
 - Redis for cart/cache state.
 - Continuous traffic generator for live SigNoz metrics.
+- Local web UI for scenario triggering and architecture exploration.
 - OpenTelemetry traces, metrics, and logs.
 - Trace context propagation across HTTP and Kafka headers.
 - Privacy-safe structured JSON logs with trace and span ids.
@@ -21,6 +22,9 @@ This version is intentionally not an AI copilot yet. First we build the system t
 
 ```text
 Client
+  |
+  v
+ui-service
   |
   v
 checkout-service
@@ -78,6 +82,19 @@ The cart API is exposed at:
 ```text
 http://localhost:18081
 ```
+
+The ObserveAI web UI is exposed at:
+
+```text
+http://localhost:18082
+```
+
+Use it to:
+
+- check service health
+- trigger demo scenarios
+- inspect the architecture map
+- jump into SigNoz
 
 ## Try A Normal Checkout
 
@@ -157,6 +174,7 @@ TRAFFIC_BURST_SIZE=3
 ## What To Look For In SigNoz
 
 - Services: `checkout-service`, `payment-service`, `inventory-service`, `ai-fraud-service`, `cart-service`, `traffic-generator`.
+- UI service: `ui-service`.
 - Additional services: `cart-service`, PostgreSQL spans, Redis spans.
 - A checkout trace with HTTP spans for inventory and payment.
 - Kafka producer span from checkout to `fraud.check.requested`.

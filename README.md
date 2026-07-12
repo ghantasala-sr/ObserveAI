@@ -270,6 +270,13 @@ Quick health check after enabling SigNoz MCP through Foundry:
 bash scripts/check_mcp.sh
 ```
 
+Auth check after creating a SigNoz service-account API key:
+
+```bash
+export SIGNOZ_API_KEY='<your-signoz-service-account-key>'
+bash scripts/check_mcp_auth.sh
+```
+
 This is a practice integration for learning how AI assistants can query SigNoz telemetry. Do not commit API keys or local MCP secrets.
 
 ## V1 Boundary

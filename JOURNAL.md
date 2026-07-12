@@ -737,7 +737,7 @@ Notes / follow-ups:
 
 ## 2026-07-12 - UI AI Investigation Layer
 
-Commit: pending until pushed
+Commit: `d4f3809 Add MCP investigation layer to UI`
 
 What changed:
 
@@ -768,6 +768,36 @@ Notes / follow-ups:
 
 - Next useful UI improvement: show a small “MCP connected” status from backend health checks instead of static text.
 - Later, the Trace Helper and MCP prompts can feed into the hackathon AI Agent Observability project.
+
+## 2026-07-12 - Fix Architecture Map Trimming
+
+Commit: pending until pushed
+
+What changed:
+
+- Fixed the architecture map clipping on narrower laptop/split-screen widths.
+- Allowed the main workspace, sections, system map, map stage, and map cards to shrink correctly inside CSS grid layouts.
+- Moved the main two-column layout breakpoint from `980px` to `1180px`, so the poster intro and architecture map stack before the map becomes cramped.
+- Updated the architecture map columns to use `minmax(0, ...)`, preventing CSS grid children from forcing horizontal overflow.
+- Added horizontal overflow handling to the system map as a safety net.
+
+Why:
+
+- The right side of the architecture UI was being trimmed because the map’s natural minimum width was larger than the visible workspace.
+- This makes the architecture easier to inspect during demos, especially on MacBook/split-screen windows.
+
+Validation:
+
+- Ran `python3 -m compileall services/ui/main.py`.
+- Parsed the inline browser JavaScript with `node --check`.
+- Rebuilt and restarted `ui-service`.
+- Confirmed `http://127.0.0.1:18082/health` returns OK.
+- Confirmed the rendered page still contains `Architecture map`, `AI investigation layer`, and `SigNoz MCP`.
+
+Notes / follow-ups:
+
+- If we want an even better demo surface later, add a compact/fullscreen architecture toggle.
+- A dedicated “presentation mode” would make screenshots and blog images cleaner.
 
 ## Next Best Steps
 

@@ -287,6 +287,7 @@ HTML = """
       top: 20px;
       align-self: start;
       animation: rise .7s ease .05s both;
+      min-width: 0;
     }
     .eyebrow {
       color: var(--accent-2);
@@ -333,6 +334,7 @@ HTML = """
       display: grid;
       gap: 20px;
       animation: rise .7s ease .12s both;
+      min-width: 0;
     }
     section {
       background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.025));
@@ -340,6 +342,7 @@ HTML = """
       border-radius: 28px;
       box-shadow: var(--shadow);
       overflow: hidden;
+      min-width: 0;
     }
     .section-head {
       padding: 22px 24px;
@@ -494,6 +497,8 @@ HTML = """
       padding: 22px;
       display: grid;
       gap: 18px;
+      min-width: 0;
+      overflow-x: auto;
       background:
         radial-gradient(circle at 28% 20%, rgba(255,91,53,.13), transparent 28%),
         radial-gradient(circle at 85% 62%, rgba(95,211,255,.10), transparent 28%);
@@ -526,10 +531,11 @@ HTML = """
     .map-stage {
       position: relative;
       display: grid;
-      grid-template-columns: minmax(220px, .8fr) minmax(300px, 1.15fr) minmax(270px, 1fr);
+      grid-template-columns: minmax(0, .8fr) minmax(0, 1.15fr) minmax(0, 1fr);
       grid-template-rows: auto auto auto;
       gap: 16px;
       min-height: 620px;
+      min-width: 0;
     }
     .map-card {
       border: 1px solid rgba(255,255,255,.10);
@@ -540,6 +546,7 @@ HTML = """
       overflow: hidden;
       box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
       transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+      min-width: 0;
     }
     .map-card::before {
       content: "";
@@ -1114,10 +1121,14 @@ HTML = """
       72% { width: 88%; }
       to { width: 100%; }
     }
-    @media (max-width: 980px) {
+    @media (max-width: 1180px) {
       header, main { padding-left: 18px; padding-right: 18px; }
       main { grid-template-columns: 1fr; }
       .intro { position: relative; top: auto; }
+      .intro h2 { max-width: 900px; }
+      .workspace { width: 100%; }
+    }
+    @media (max-width: 980px) {
       .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; }
       .node { grid-column: auto !important; grid-row: auto !important; min-height: 78px; }
       .rail { display: none; }

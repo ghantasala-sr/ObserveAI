@@ -654,7 +654,7 @@ Notes / follow-ups:
 
 ## 2026-07-12 - Trace Helper Investigation Panel
 
-Commit: pending until pushed
+Commit: `a8d4872 Add UI trace helper`
 
 What changed:
 

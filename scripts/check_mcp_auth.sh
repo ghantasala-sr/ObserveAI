@@ -4,11 +4,21 @@ set -euo pipefail
 SIGNOZ_URL="${SIGNOZ_URL:-http://localhost:8080}"
 MCP_ENDPOINT_URL="${MCP_ENDPOINT_URL:-http://localhost:8000/mcp}"
 
+if [[ -f ".env" ]]; then
+  set -a
+  # shellcheck disable=SC1091
+  source ".env"
+  set +a
+fi
+
 if [[ -z "${SIGNOZ_API_KEY:-}" ]]; then
   echo "SIGNOZ_API_KEY is not set."
   echo
-  echo "Set it only in your local shell, not in the repo:"
+  echo "Set it in your local shell:"
   echo "  export SIGNOZ_API_KEY='<your-signoz-service-account-key>'"
+  echo
+  echo "Or add it to the local .env file, which is gitignored:"
+  echo "  SIGNOZ_API_KEY='<your-signoz-service-account-key>'"
   echo
   echo "Then run:"
   echo "  bash scripts/check_mcp_auth.sh"

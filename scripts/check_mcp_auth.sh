@@ -9,6 +9,19 @@ if [[ -f ".env" ]]; then
   # shellcheck disable=SC1091
   source ".env"
   set +a
+
+  if [[ -z "${SIGNOZ_API_KEY:-}" ]]; then
+    while IFS= read -r line; do
+      case "${line}" in
+        SIGNOZ_API_KEY=*)
+          SIGNOZ_API_KEY="${line#SIGNOZ_API_KEY=}"
+          SIGNOZ_API_KEY="${SIGNOZ_API_KEY#"${SIGNOZ_API_KEY%%[![:space:]]*}"}"
+          SIGNOZ_API_KEY="${SIGNOZ_API_KEY%"${SIGNOZ_API_KEY##*[![:space:]]}"}"
+          export SIGNOZ_API_KEY
+          ;;
+      esac
+    done < ".env"
+  fi
 fi
 
 if [[ -z "${SIGNOZ_API_KEY:-}" ]]; then
@@ -47,7 +60,7 @@ echo "Checking whether MCP endpoint accepts the auth header:"
 echo "  ${MCP_ENDPOINT_URL}"
 
 mcp_status="$(
-  curl -sS -o /tmp/observeai-signoz-mcp-auth-check.txt -w "%{http_code}" \
+  curl -sS --max-time 3 -o /tmp/observeai-signoz-mcp-auth-check.txt -w "%{http_code}" \
     -H "SIGNOZ-API-KEY: ${SIGNOZ_API_KEY}" \
     "${MCP_ENDPOINT_URL}" || true
 )"
@@ -58,7 +71,12 @@ if [[ "${mcp_status}" == "401" ]]; then
   exit 1
 fi
 
-echo "MCP auth header accepted. HTTP status: ${mcp_status}"
+if [[ "${mcp_status}" == "000" ]]; then
+  echo "MCP endpoint did not return a normal HTTP response within 3 seconds."
+  echo "This can be OK for a streaming MCP endpoint as long as it is not returning 401."
+else
+  echo "MCP auth header accepted. HTTP status: ${mcp_status}"
+fi
 echo
 echo "Next: configure your MCP client with:"
 echo "  URL: ${MCP_ENDPOINT_URL}"

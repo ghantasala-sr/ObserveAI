@@ -890,6 +890,103 @@ HTML = """
       max-height: 360px;
       overflow: auto;
     }
+    .trace-helper {
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+    }
+    .trace-empty {
+      border: 1px dashed rgba(255,255,255,.16);
+      border-radius: 22px;
+      padding: 18px;
+      color: var(--muted);
+      line-height: 1.5;
+      background: rgba(0,0,0,.14);
+    }
+    .trace-summary {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .trace-kv {
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 18px;
+      padding: 12px;
+      background: rgba(0,0,0,.18);
+      min-width: 0;
+    }
+    .trace-kv span {
+      display: block;
+      color: var(--muted);
+      font-size: 10.5px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+    }
+    .trace-kv strong {
+      display: block;
+      font-size: 13px;
+      word-break: break-word;
+    }
+    .trace-body {
+      display: grid;
+      grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+      gap: 14px;
+    }
+    .trace-card {
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 22px;
+      padding: 15px;
+      background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.02));
+      min-width: 0;
+    }
+    .trace-card h4 {
+      margin: 0 0 10px;
+      font-size: 13px;
+      letter-spacing: -.01em;
+    }
+    .trace-card ul {
+      margin: 0;
+      padding-left: 18px;
+      color: #d7dae1;
+      font-size: 12.5px;
+      line-height: 1.65;
+    }
+    .trace-card p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.55;
+      font-size: 12.5px;
+    }
+    .query-box {
+      display: grid;
+      gap: 10px;
+    }
+    .query-box pre {
+      margin: 0;
+      max-height: 210px;
+      overflow: auto;
+      border: 1px solid rgba(95,211,255,.16);
+      border-radius: 18px;
+      padding: 13px;
+      background: rgba(0,0,0,.28);
+      color: #dff6ff;
+      font-size: 11.5px;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    .helper-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .button.small {
+      padding: 8px 11px;
+      font-size: 12px;
+    }
+    .button.ghost {
+      background: rgba(255,255,255,.035);
+    }
     .event {
       display: grid;
       grid-template-columns: 92px 1fr;
@@ -944,6 +1041,7 @@ HTML = """
       header { align-items: flex-start; flex-direction: column; }
       .scenario-grid, .services, .status-row { grid-template-columns: 1fr; }
       .node-grid, .node-grid.two, .topics, .signoz-chips { grid-template-columns: 1fr; }
+      .trace-summary, .trace-body { grid-template-columns: 1fr; }
       .stat { border-right: 0; border-bottom: 1px solid var(--line); }
     }
   </style>
@@ -1113,6 +1211,21 @@ HTML = """
       <section>
         <div class="section-head">
           <div>
+            <h3>Trace helper</h3>
+            <p>After a scenario runs, use this to investigate the exact evidence in SigNoz.</p>
+          </div>
+          <a class="button" href="http://127.0.0.1:8080" target="_blank" rel="noreferrer">Open SigNoz</a>
+        </div>
+        <div class="trace-helper" id="trace-helper">
+          <div class="trace-empty">
+            Run a scenario to generate an order id, investigation checklist, and a copyable ClickHouse query for SigNoz.
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <div>
             <h3>Event trail</h3>
             <p>Recent UI-triggered runs.</p>
           </div>
@@ -1236,6 +1349,92 @@ HTML = """
         telemetry: ["postgres", "otel", "signoz", "traces", "metrics", "dashboards", "alerts"]
       }
     };
+    const investigationGuides = {
+      normal: {
+        focus: "Healthy baseline trace across checkout, Kafka, fraud, notification, and analytics.",
+        dashboard: "System Overview / Checkout Health",
+        alert: "No alert expected. Use this as baseline noise level.",
+        look: ["Traces → checkout-service", "Kafka producer and consumer spans", "AI fraud decision logs", "Metrics baseline for request count and p99"],
+        services: ["checkout-service", "ai-fraud-service", "notification-service", "analytics-service"]
+      },
+      payment_slow: {
+        focus: "Payment-service latency should dominate the checkout trace.",
+        dashboard: "Payment Health",
+        alert: "payment p99 > 800ms or checkout p99 > 1s",
+        look: ["Traces → checkout-service → payment-service span", "Metrics → p99 duration by service", "Logs containing payment_slow", "Dashboard panel: payment latency"],
+        services: ["checkout-service", "payment-service"]
+      },
+      payment_fail: {
+        focus: "Payment returns failure and checkout records an expected failed path.",
+        dashboard: "Checkout Health / Payment Health",
+        alert: "payment failure rate > 5%",
+        look: ["Logs for payment failure", "Trace error status on payment-service", "Checkout response status", "Payment failure counter"],
+        services: ["checkout-service", "payment-service"]
+      },
+      provider_timeout: {
+        focus: "External provider timeout simulation from payment-service.",
+        dashboard: "Payment Health",
+        alert: "payment timeout logs > threshold",
+        look: ["Logs containing provider timeout", "Payment span duration and error", "Checkout failure propagation", "Alert query for timeout count"],
+        services: ["checkout-service", "payment-service"]
+      },
+      inventory_fail: {
+        focus: "Out-of-stock business failure, not necessarily infra failure.",
+        dashboard: "Checkout Health",
+        alert: "Usually business metric, not pager alert.",
+        look: ["Inventory-service trace branch", "HTTP 409 style response", "Logs for out_of_stock", "Checkout failure reason"],
+        services: ["checkout-service", "inventory-service"]
+      },
+      fraud_ai_slow: {
+        focus: "Async AI fraud inference latency after checkout has queued Kafka work.",
+        dashboard: "Fraud Pipeline / AI Services",
+        alert: "fraud inference p99 > 500ms",
+        look: ["Kafka consumer span in ai-fraud-service", "fraud.inference duration", "Risk score logs", "AI services dashboard"],
+        services: ["checkout-service", "ai-fraud-service"]
+      },
+      kafka_consumer_slow: {
+        focus: "Kafka consumer lag grows because fraud consumer processes slowly.",
+        dashboard: "Fraud Pipeline",
+        alert: "fraud consumer lag > threshold",
+        look: ["Kafka publish span from checkout", "ai-fraud-service consumer latency", "consumer lag dashboard panel", "Fraud topic backlog evidence"],
+        services: ["checkout-service", "ai-fraud-service"]
+      },
+      poison_message: {
+        focus: "Poison event causes retries and DLQ publish.",
+        dashboard: "Fraud Pipeline",
+        alert: "DLQ messages > 0 or retry count > threshold",
+        look: ["Logs for poison message", "DLQ publish span", "fraud.check.dlq topic", "Exception/error status in ai-fraud-service"],
+        services: ["checkout-service", "ai-fraud-service"]
+      },
+      notification_slow: {
+        focus: "Checkout succeeds, then downstream notification consumer is slow.",
+        dashboard: "Downstream Consumers",
+        alert: "notification consumer latency high",
+        look: ["notification-service consumer span", "fraud.check.completed event path", "Notification DB write latency", "Downstream consumer dashboard"],
+        services: ["notification-service", "ai-fraud-service"]
+      },
+      notification_fail: {
+        focus: "Checkout succeeds but notification provider simulation fails downstream.",
+        dashboard: "Downstream Consumers",
+        alert: "notification provider failures > threshold",
+        look: ["notification-service error logs", "Provider failure span", "Business impact: order succeeded but notification degraded", "Alert query for notification failures"],
+        services: ["notification-service", "ai-fraud-service"]
+      },
+      analytics_slow: {
+        focus: "Analytics consumer is slow after fraud completion.",
+        dashboard: "Downstream Consumers",
+        alert: "analytics consumer latency high",
+        look: ["analytics-service consumer span", "analytics DB write span", "Processing delay metrics", "Downstream Consumers dashboard"],
+        services: ["analytics-service", "ai-fraud-service"]
+      },
+      db_slow: {
+        focus: "Postgres step slows checkout and should appear as DB span latency.",
+        dashboard: "Database and Redis Health",
+        alert: "Postgres span p99 > 500ms",
+        look: ["Checkout trace → Postgres span", "DB slow query marker", "Database dashboard p99", "Checkout p99 impact"],
+        services: ["checkout-service"]
+      }
+    };
     const scenarios = Object.keys(scenarioDetails);
     const servicesEl = document.querySelector("#services");
     const scenariosEl = document.querySelector("#scenarios");
@@ -1245,6 +1444,7 @@ HTML = """
     const mapStageEl = document.querySelector(".map-stage");
     const flowReadoutEl = document.querySelector("#flow-readout");
     const capturePanelEl = document.querySelector("#capture-panel");
+    const traceHelperEl = document.querySelector("#trace-helper");
 
     function pretty(name) {
       return name.replaceAll("_", " ").replace(/\\b\\w/g, c => c.toUpperCase());
@@ -1257,6 +1457,79 @@ HTML = """
       row.innerHTML = `<time>${now.toLocaleTimeString()}</time><div><code>${label}</code><br>${detail}</div>`;
       eventsEl.prepend(row);
       lastCodeEl.textContent = code;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>"']/g, char => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;"
+      }[char]));
+    }
+
+    function queryForRun(scenario, orderId, services) {
+      const serviceList = services.map(service => `'${service}'`).join(", ");
+      const orderFilter = orderId && !String(orderId).startsWith("see ")
+        ? `\\n  AND (attributes_string['order_id'] = '${orderId}' OR trace_id IN (
+    SELECT trace_id
+    FROM signoz_traces.distributed_signoz_index_v3
+    WHERE timestamp >= now() - INTERVAL 30 MINUTE
+      AND attributes_string['order_id'] = '${orderId}'
+  ))`
+        : "";
+      return `SELECT
+  timestamp,
+  trace_id,
+  serviceName,
+  name,
+  duration_nano / 1000000 AS duration_ms,
+  status_code,
+  has_error,
+  attributes_string['scenario'] AS scenario,
+  attributes_string['order_id'] AS order_id
+FROM signoz_traces.distributed_signoz_index_v3
+WHERE timestamp >= now() - INTERVAL 30 MINUTE
+  AND serviceName IN (${serviceList})
+  AND (attributes_string['scenario'] = '${scenario}' OR attributes_string['order_id'] = '${orderId}' OR name ILIKE '%${scenario}%')${orderFilter}
+ORDER BY timestamp DESC
+LIMIT 100;`;
+    }
+
+    function renderTraceHelper({scenario, orderId, statusCode, expected}) {
+      const guide = investigationGuides[scenario] || investigationGuides.normal;
+      const query = queryForRun(scenario, orderId, guide.services);
+      traceHelperEl.innerHTML = `
+        <div class="trace-summary">
+          <div class="trace-kv"><span>Scenario</span><strong>${escapeHtml(pretty(scenario))}</strong></div>
+          <div class="trace-kv"><span>Order id</span><strong>${escapeHtml(orderId || "not returned")}</strong></div>
+          <div class="trace-kv"><span>Response</span><strong>${escapeHtml(statusCode || "—")}</strong></div>
+        </div>
+        <div class="trace-body">
+          <div class="trace-card">
+            <h4>Investigation path</h4>
+            <p>${escapeHtml(guide.focus)}</p>
+            <ul>${guide.look.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+          </div>
+          <div class="trace-card query-box">
+            <h4>Copy into SigNoz ClickHouse Query</h4>
+            <pre id="trace-query">${escapeHtml(query)}</pre>
+            <div class="helper-actions">
+              <button class="button small primary" id="copy-trace-query">Copy query</button>
+              <a class="button small ghost" href="http://127.0.0.1:8080" target="_blank" rel="noreferrer">Open SigNoz</a>
+            </div>
+          </div>
+        </div>
+        <div class="trace-body">
+          <div class="trace-card"><h4>Dashboard</h4><p>${escapeHtml(guide.dashboard)}</p></div>
+          <div class="trace-card"><h4>Alert candidate</h4><p>${escapeHtml(guide.alert)}</p><p>${escapeHtml(expected || "")}</p></div>
+        </div>
+      `;
+      document.querySelector("#copy-trace-query")?.addEventListener("click", async () => {
+        await navigator.clipboard.writeText(query);
+        addEvent("trace-helper", "Copied SigNoz ClickHouse query.", "copied");
+      });
     }
 
     function highlightScenario(name) {
@@ -1357,6 +1630,12 @@ HTML = """
       const data = await res.json();
       const order = data.response?.order_id || data.response?.detail?.reason || "see response";
       addEvent(name, `${data.expected || "Scenario completed."} Result: ${order}`, data.status_code || res.status);
+      renderTraceHelper({
+        scenario: name,
+        orderId: order,
+        statusCode: data.status_code || res.status,
+        expected: data.expected
+      });
     }
 
     async function seedCart() {

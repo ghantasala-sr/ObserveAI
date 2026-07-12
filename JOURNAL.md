@@ -652,16 +652,54 @@ Notes / follow-ups:
 - Next useful UI improvement: after a scenario completes, show the returned `order_id` in a dedicated trace helper panel.
 - After that, add direct links or instructions for the matching SigNoz dashboard and alert query.
 
+## 2026-07-12 - Trace Helper Investigation Panel
+
+Commit: pending until pushed
+
+What changed:
+
+- Added a Trace Helper panel to the UI.
+- After a scenario runs, the panel now shows:
+  - scenario name
+  - returned `order_id`
+  - response status
+  - likely bottleneck or failure focus
+  - where to look in SigNoz
+  - dashboard hint
+  - alert candidate
+  - copyable ClickHouse query scoped to the scenario/order id
+- Added scenario-specific investigation guides for payment, inventory, Kafka lag, poison/DLQ, notification, analytics, AI fraud, and database slow paths.
+
+Why:
+
+- The animation shows how traffic and telemetry move through the architecture.
+- The Trace Helper tells the user how to investigate the exact run in SigNoz.
+- This bridges the learning gap between “I triggered a failure” and “I know what evidence to search for.”
+
+Validation:
+
+- Ran `python3 -m compileall services/ui/main.py`.
+- Parsed the inline browser JavaScript with `node --check`.
+- Rebuilt and restarted `ui-service`.
+- Confirmed `http://127.0.0.1:18082/health` returns healthy.
+- Confirmed the UI contains the Trace Helper section.
+- Triggered `payment_slow` through the UI API successfully.
+- Ran the generated helper-style ClickHouse query against SigNoz and confirmed it returns the exact slow payment trace rows.
+
+Notes / follow-ups:
+
+- Next useful UI improvement: make the helper produce direct links to specific saved dashboard docs or setup instructions.
+- Later, this helper can become the prompt/context payload for the SigNoz MCP SRE Sidekick.
+
 ## Next Best Steps
 
 Recommended next steps:
 
-1. Add a live “last order id / trace helper” panel to the UI.
-2. Add dashboard deep links or alert setup links to the UI.
-3. Add the `ObserveAI Downstream Consumers` dashboard in SigNoz.
-4. Create notification and analytics alerts from `alerts/README.md`.
-5. Add a rules-based recommendation service.
-6. Later, add SigNoz MCP and build the SRE Sidekick copilot.
+1. Add dashboard deep links or alert setup links to the UI.
+2. Add the `ObserveAI Downstream Consumers` dashboard in SigNoz.
+3. Create notification and analytics alerts from `alerts/README.md`.
+4. Add a rules-based recommendation service.
+5. Later, add SigNoz MCP and build the SRE Sidekick copilot.
 
 ## Journal Template For Future Work
 

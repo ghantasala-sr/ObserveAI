@@ -250,6 +250,28 @@ Included V1 alert signals:
 - Analytics p99 latency and DLQ processing
 - ObserveAI telemetry silence
 
+## SigNoz MCP Practice
+
+MCP learning notes and safe local config examples are in:
+
+```text
+docs/mcp/
+```
+
+Start with:
+
+```text
+docs/mcp/README.md
+```
+
+Quick health check after enabling SigNoz MCP through Foundry:
+
+```bash
+bash scripts/check_mcp.sh
+```
+
+This is a practice integration for learning how AI assistants can query SigNoz telemetry. Do not commit API keys or local MCP secrets.
+
 ## V1 Boundary
 
 ObserveAI V1 uses deterministic rules for fraud scoring. It does not require Claude, ChatGPT, OpenAI, or any paid LLM API.
@@ -258,5 +280,5 @@ Later versions can add:
 
 - AI recommendation service.
 - Notification and analytics consumers.
-- SigNoz MCP integration.
+- Deeper SigNoz MCP workflows.
 - SRE Sidekick AI copilot on top of the telemetry.

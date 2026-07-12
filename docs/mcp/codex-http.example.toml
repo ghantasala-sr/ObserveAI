@@ -1,0 +1,5 @@
+# Example only. Do not put secrets in this repository.
+# Add this to your local Codex config if SigNoz MCP is running in HTTP mode.
+
+[mcp_servers.signoz]
+url = "http://localhost:8000/mcp"

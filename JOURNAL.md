@@ -691,15 +691,52 @@ Notes / follow-ups:
 - Next useful UI improvement: make the helper produce direct links to specific saved dashboard docs or setup instructions.
 - Later, this helper can become the prompt/context payload for the SigNoz MCP SRE Sidekick.
 
+## 2026-07-12 - SigNoz MCP Learning Integration
+
+Commit: pending until pushed
+
+What changed:
+
+- Added MCP learning documentation under `docs/mcp/`.
+- Added a Foundry casting example with MCP enabled:
+  - `docs/mcp/casting-with-mcp.example.yaml`
+- Added a safe Codex HTTP MCP config example:
+  - `docs/mcp/codex-http.example.toml`
+- Added `scripts/check_mcp.sh` to verify the local SigNoz MCP health endpoint.
+- Updated README with the MCP practice workflow.
+
+Why:
+
+- We want to understand MCP before the hackathon without using ObserveAI as the hackathon project.
+- MCP is important because SigNoz recommends it for AI assistant workflows over traces, logs, metrics, dashboards, and alerts.
+- This gives us a safe practice path: ObserveAI generates telemetry, SigNoz stores it, MCP lets an AI assistant investigate it.
+
+Validation:
+
+- Verified from official SigNoz docs that Foundry is the supported self-host Docker install path and that MCP is enabled through an `mcp.spec.enabled: true` block in `casting.yaml`.
+- Verified from official SigNoz docs that local self-hosted MCP exposes HTTP mode at `http://localhost:8000/mcp` and health at `/livez`.
+- Ran `bash -n scripts/check_mcp.sh`.
+- Ran `bash scripts/check_mcp.sh`; it correctly reported that local MCP is not enabled/running yet on port `8000`.
+- Added docs and scripts without committing secrets.
+
+Notes / follow-ups:
+
+- We still need to enable MCP in the actual local SigNoz Foundry deployment.
+- We still need to create a SigNoz service-account API key locally.
+- Once connected, try prompts like “Investigate the latest payment_slow scenario” and “Find Kafka lag or DLQ evidence.”
+
 ## Next Best Steps
 
 Recommended next steps:
 
-1. Add dashboard deep links or alert setup links to the UI.
-2. Add the `ObserveAI Downstream Consumers` dashboard in SigNoz.
-3. Create notification and analytics alerts from `alerts/README.md`.
-4. Add a rules-based recommendation service.
-5. Later, add SigNoz MCP and build the SRE Sidekick copilot.
+1. Enable SigNoz MCP in the local Foundry `casting.yaml` and verify `http://localhost:8000/livez`.
+2. Connect Codex/Claude/Cursor to `http://localhost:8000/mcp`.
+3. Use MCP to investigate ObserveAI scenarios in natural language.
+4. Add dashboard deep links or alert setup links to the UI.
+5. Add the `ObserveAI Downstream Consumers` dashboard in SigNoz.
+6. Create notification and analytics alerts from `alerts/README.md`.
+7. Add a rules-based recommendation service.
+8. Later, build the separate hackathon AI Agent Observability project.
 
 ## Journal Template For Future Work
 

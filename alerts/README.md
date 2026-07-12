@@ -50,6 +50,10 @@ Important:
 | Fraud AI p99 latency high | `queries/fraud-ai-p99-latency.sql` | `value > 500` ms | Warning | AI inference is slowing the fraud pipeline. |
 | Fraud Kafka consumer lag high | `queries/kafka-fraud-consumer-lag.sql` | `value > 20` messages | Warning | Fraud consumer is falling behind. |
 | Fraud DLQ events detected | `queries/fraud-dlq-events.sql` | `value > 0` events | Critical | Fraud messages are failing after retries. |
+| Notification error rate high | `queries/notification-error-rate.sql` | `value > 10` percent | Warning | Customer notifications are failing. |
+| Notification p99 latency high | `queries/notification-p99-latency.sql` | `value > 1000` ms | Warning | Notification provider/path is slow. |
+| Analytics p99 latency high | `queries/analytics-p99-latency.sql` | `value > 1000` ms | Warning | Business analytics consumer is slow. |
+| Analytics DLQ events detected | `queries/analytics-dlq-events.sql` | `value > 0` events | Warning | Analytics observed fraud DLQ events. |
 | ObserveAI telemetry silent | `queries/observeai-telemetry-silence.sql` | `value < 50` spans | Critical | Services or traffic generator may be down. |
 
 ## Suggested Alert Messages
@@ -100,6 +104,22 @@ Likely demo cause: kafka_consumer_slow.
 ObserveAI fraud message was sent to the DLQ.
 Check kafka publish fraud.check.dlq spans and poison retry spans.
 Likely demo cause: poison_message.
+```
+
+### Notification error rate high
+
+```text
+ObserveAI notification-service is failing notifications.
+Check notification.send spans and notification-service logs.
+Likely demo cause: notification_fail.
+```
+
+### Analytics p99 latency high
+
+```text
+ObserveAI analytics-service event processing is slow.
+Check analytics.process_fraud_completed spans.
+Likely demo cause: analytics_slow.
 ```
 
 ## How To Test Alerts

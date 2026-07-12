@@ -42,6 +42,28 @@ async def init_schema(pool: asyncpg.Pool) -> None:
               model_version TEXT NOT NULL,
               created_at TIMESTAMPTZ NOT NULL DEFAULT now()
             );
+
+            CREATE TABLE IF NOT EXISTS notifications (
+              notification_id TEXT PRIMARY KEY,
+              order_id TEXT NOT NULL,
+              user_id TEXT,
+              channel TEXT NOT NULL,
+              status TEXT NOT NULL,
+              reason TEXT,
+              created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+            );
+
+            CREATE TABLE IF NOT EXISTS analytics_events (
+              event_id TEXT PRIMARY KEY,
+              event_type TEXT NOT NULL,
+              order_id TEXT,
+              user_id TEXT,
+              scenario TEXT,
+              decision TEXT,
+              risk_score NUMERIC,
+              status TEXT NOT NULL,
+              created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+            );
             """
         )
 

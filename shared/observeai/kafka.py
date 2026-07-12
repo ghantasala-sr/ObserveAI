@@ -73,12 +73,12 @@ async def publish_event(
         await producer.stop()
 
 
-def make_consumer(topic: str, group_id: str) -> AIOKafkaConsumer:
+def make_consumer(topic: str, group_id: str, *, auto_offset_reset: str = "earliest") -> AIOKafkaConsumer:
     return AIOKafkaConsumer(
         topic,
         bootstrap_servers=REDPANDA_BROKERS,
         group_id=group_id,
         enable_auto_commit=False,
-        auto_offset_reset="earliest",
+        auto_offset_reset=auto_offset_reset,
         value_deserializer=lambda payload: json.loads(payload.decode("utf-8")),
     )

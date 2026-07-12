@@ -37,6 +37,10 @@ ai-fraud-service
   |
   v
 Redpanda topic: fraud.check.completed
+  |----> notification-service -> PostgreSQL notifications
+  |
+  v
+analytics-service -> PostgreSQL analytics_events
 
 All services -> OpenTelemetry Collector -> SigNoz
 ```
@@ -103,6 +107,9 @@ Use the `scenario` field to create useful observability signals:
 | `fraud_ai_slow` | Checkout succeeds, async fraud consumer is slow. |
 | `kafka_consumer_slow` | Checkout succeeds, fraud Kafka consumer intentionally falls behind. |
 | `poison_message` | Checkout succeeds, fraud consumer retries and sends message to DLQ. |
+| `notification_slow` | Checkout succeeds, notification consumer is intentionally slow. |
+| `notification_fail` | Checkout succeeds, notification consumer records a provider failure. |
+| `analytics_slow` | Checkout succeeds, analytics consumer is intentionally slow. |
 | `db_slow` | Checkout succeeds with an intentionally slow DB step. |
 
 ## Smoke Test
@@ -136,6 +143,8 @@ It continuously creates:
 - inventory failures
 - slow database requests
 - slow fraud-service requests
+- slow/failing notification requests
+- slow analytics consumer requests
 - cart-backed checkouts
 
 Tune the volume in `docker-compose.yml` or `.env`:
@@ -154,7 +163,10 @@ TRAFFIC_BURST_SIZE=3
 - Kafka consumer span in `ai-fraud-service`.
 - Kafka consumer lag estimate on `fraud.inference` spans.
 - DLQ publish spans for `fraud.check.dlq` during poison-message scenarios.
+- Notification consumer spans after fraud checks complete.
+- Analytics consumer spans for completed fraud and DLQ events.
 - PostgreSQL order writes and fraud-result writes.
+- PostgreSQL notification and analytics writes.
 - Redis cart cache hit/miss spans.
 - Logs that include `trace_id`, `span_id`, `order_id`, and safe scenario metadata.
 - Metrics such as `checkout_requests_total`, `payment_failures_total`, and `fraud_high_risk_orders_total`.
@@ -180,6 +192,7 @@ Included dashboard groups:
 - Payment Health
 - Database and Redis Health
 - Fraud Pipeline
+- Downstream Consumers
 
 ## Alerts
 
@@ -206,6 +219,8 @@ Included V1 alert signals:
 - Fraud AI p99 latency
 - Fraud Kafka consumer lag
 - Fraud DLQ events
+- Notification error rate and p99 latency
+- Analytics p99 latency and DLQ processing
 - ObserveAI telemetry silence
 
 ## V1 Boundary

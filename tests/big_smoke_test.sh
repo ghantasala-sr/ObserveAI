@@ -98,7 +98,7 @@ run_cart_checkout() {
 }
 
 for index in $(seq 1 "$TOTAL_REQUESTS"); do
-  case $((index % 12)) in
+  case $((index % 15)) in
     0)
       run_checkout "$index" "payment_fail" "249.0" "1" "502"
       ;;
@@ -134,6 +134,15 @@ for index in $(seq 1 "$TOTAL_REQUESTS"); do
       ;;
     11)
       run_checkout "$index" "poison_message" "459.0" "2" "200"
+      ;;
+    12)
+      run_checkout "$index" "notification_slow" "219.0" "1" "200"
+      ;;
+    13)
+      run_checkout "$index" "notification_fail" "189.0" "1" "200"
+      ;;
+    14)
+      run_checkout "$index" "analytics_slow" "879.0" "3" "200"
       ;;
   esac
 done

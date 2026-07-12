@@ -473,17 +473,69 @@ Notes / follow-ups:
 - Add the new panels to the `ObserveAI Fraud Pipeline` dashboard.
 - Optional next step: add a dedicated notification-service consumer and analytics-service consumer.
 
+## 2026-07-12 - Downstream Notification And Analytics Consumers
+
+Commit: pending until pushed
+
+What changed:
+
+- Added `notification-service`.
+- Added `analytics-service`.
+- Added Postgres tables:
+  - `notifications`
+  - `analytics_events`
+- Updated `fraud.check.completed` events to carry the original scenario.
+- Added new scenarios:
+  - `notification_slow`
+  - `notification_fail`
+  - `analytics_slow`
+- Updated traffic generator and smoke tests to produce the new scenarios.
+- Added a `latest` offset option for new downstream Kafka consumers so demo consumers focus on fresh traffic instead of replaying old backlog.
+- Added dashboard queries for:
+  - notification latency
+  - notification sent/failed status
+  - analytics processing latency
+  - analytics event volume
+- Added alert queries for:
+  - notification error rate
+  - notification p99 latency
+  - analytics p99 latency
+  - analytics DLQ processing
+- Updated README, dashboard docs, alert docs, Docker Compose, and dashboard plan.
+
+Why:
+
+- Real enterprise event pipelines fan out to multiple downstream consumers after a business event.
+- This extends ObserveAI beyond checkout/fraud into customer notifications and business analytics.
+- It teaches that a checkout can succeed while downstream async systems become slow, fail, or process DLQ events.
+
+Validation:
+
+- Rebuilt and restarted the stack with Docker Compose.
+- Confirmed `notification-service` and `analytics-service` are running.
+- Ran `tests/smoke_test.sh` successfully.
+- Verified logs show:
+  - `notification_slow`
+  - `notification_fail`
+  - `analytics_slow`
+  - analytics DLQ processing
+- Ran every SQL file in `dashboards/queries` and `alerts/queries` against SigNoz ClickHouse.
+- Verified all dashboard and alert queries return rows.
+
+Notes / follow-ups:
+
+- Add the new `ObserveAI Downstream Consumers` dashboard in SigNoz.
+- Consider adding a rules-based recommendation consumer next.
+
 ## Next Best Steps
 
 Recommended next steps:
 
-1. Add the Kafka lag and DLQ panels to the Fraud Pipeline dashboard.
-2. Create the Kafka consumer lag and DLQ alerts from `alerts/README.md`.
-3. Add `notification-service`.
-4. Add `analytics-service`.
-5. Add rules-based recommendation service.
-6. Add a small frontend UI for triggering scenarios.
-7. Later, add SigNoz MCP and build the SRE Sidekick copilot.
+1. Add the `ObserveAI Downstream Consumers` dashboard in SigNoz.
+2. Create notification and analytics alerts from `alerts/README.md`.
+3. Add a rules-based recommendation service.
+4. Add a small frontend UI for triggering scenarios.
+5. Later, add SigNoz MCP and build the SRE Sidekick copilot.
 
 ## Journal Template For Future Work
 

@@ -46,6 +46,15 @@
         "queries/fraud/kafka-consumer-lag.sql",
         "queries/fraud/fraud-dlq-events.sql"
       ]
+    },
+    {
+      "name": "ObserveAI Downstream Consumers",
+      "queries": [
+        "queries/consumers/notification-latency.sql",
+        "queries/consumers/notification-status.sql",
+        "queries/consumers/analytics-processing-latency.sql",
+        "queries/consumers/analytics-event-volume.sql"
+      ]
     }
   ]
 }

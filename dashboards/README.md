@@ -129,6 +129,24 @@ What to look for:
 - Consumer lag should rise during `kafka_consumer_slow`.
 - DLQ event count should rise during `poison_message`.
 
+## Dashboard 6: Downstream Consumers
+
+Goal: understand async fan-out after fraud checks complete.
+
+Recommended panels:
+
+- `queries/consumers/notification-latency.sql`
+- `queries/consumers/notification-status.sql`
+- `queries/consumers/analytics-processing-latency.sql`
+- `queries/consumers/analytics-event-volume.sql`
+
+What to look for:
+
+- `notification.send` should spike during `notification_slow`.
+- Notification failures should appear during `notification_fail`.
+- `analytics.process_fraud_completed` should appear for completed fraud events.
+- `analytics.process_fraud_dlq` should appear when poison messages reach the DLQ.
+
 ## How To Create Panels In SigNoz
 
 1. Open `http://localhost:8080`.

@@ -156,6 +156,42 @@ services:
       otel-collector:
         condition: service_started
 
+  notification-service:
+    build:
+      context: .
+      args:
+        SERVICE_MODULE: services.notification.main
+    environment:
+      <<: *app-env
+      SERVICE_NAME: notification-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+      ai-fraud-service:
+        condition: service_started
+      otel-collector:
+        condition: service_started
+
+  analytics-service:
+    build:
+      context: .
+      args:
+        SERVICE_MODULE: services.analytics.main
+    environment:
+      <<: *app-env
+      SERVICE_NAME: analytics-service
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redpanda:
+        condition: service_healthy
+      ai-fraud-service:
+        condition: service_started
+      otel-collector:
+        condition: service_started
+
   traffic-generator:
     build:
       context: .
@@ -171,6 +207,10 @@ services:
       cart-service:
         condition: service_started
       ai-fraud-service:
+        condition: service_started
+      notification-service:
+        condition: service_started
+      analytics-service:
         condition: service_started
       otel-collector:
         condition: service_started

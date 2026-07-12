@@ -66,3 +66,33 @@ curl -fsS -X POST http://localhost:18080/checkout \
     "scenario": "poison_message",
     "idempotency_key": "smoke-poison-001"
   }'
+
+curl -fsS -X POST http://localhost:18080/checkout \
+  -H "content-type: application/json" \
+  -d '{
+    "user_id": "user_notification_slow",
+    "amount": 219.0,
+    "items": [{"product_id": "webcam", "quantity": 1}],
+    "scenario": "notification_slow",
+    "idempotency_key": "smoke-notification-slow-001"
+  }'
+
+curl -fsS -X POST http://localhost:18080/checkout \
+  -H "content-type: application/json" \
+  -d '{
+    "user_id": "user_notification_fail",
+    "amount": 189.0,
+    "items": [{"product_id": "dock", "quantity": 1}],
+    "scenario": "notification_fail",
+    "idempotency_key": "smoke-notification-fail-001"
+  }'
+
+curl -fsS -X POST http://localhost:18080/checkout \
+  -H "content-type: application/json" \
+  -d '{
+    "user_id": "user_analytics_slow",
+    "amount": 879.0,
+    "items": [{"product_id": "tablet", "quantity": 3}],
+    "scenario": "analytics_slow",
+    "idempotency_key": "smoke-analytics-slow-001"
+  }'

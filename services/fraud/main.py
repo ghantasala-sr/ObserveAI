@@ -123,6 +123,7 @@ async def consume_fraud_requests():
                     result = {
                         "order_id": order_id,
                         "user_id": payload.get("user_id"),
+                        "scenario": payload.get("scenario"),
                         "risk_score": round(risk_score, 3),
                         "decision": decision,
                         "reason": reason,

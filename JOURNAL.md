@@ -693,7 +693,7 @@ Notes / follow-ups:
 
 ## 2026-07-12 - SigNoz MCP Learning Integration
 
-Commit: pending until pushed
+Commit: `5c073ed Add SigNoz MCP learning guide`
 
 What changed:
 

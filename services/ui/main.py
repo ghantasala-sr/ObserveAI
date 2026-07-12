@@ -490,6 +490,304 @@ HTML = """
     .r1 { top: 64px; left: 12%; width: 48%; }
     .r2 { top: 160px; left: 49%; width: 2px; height: 210px; background: linear-gradient(180deg, transparent, rgba(255,91,53,.65), transparent); }
     .r3 { bottom: 66px; right: 8%; width: 35%; }
+    .system-map {
+      padding: 22px;
+      display: grid;
+      gap: 18px;
+      background:
+        radial-gradient(circle at 28% 20%, rgba(255,91,53,.13), transparent 28%),
+        radial-gradient(circle at 85% 62%, rgba(95,211,255,.10), transparent 28%);
+    }
+    .map-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .legend-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 999px;
+      background: rgba(0,0,0,.18);
+    }
+    .legend-line {
+      width: 26px;
+      height: 2px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.5);
+    }
+    .legend-line.http { background: linear-gradient(90deg, #6ea8ff, #b6d0ff); }
+    .legend-line.kafka { background: linear-gradient(90deg, #ffb86b, #ff5b35); }
+    .legend-line.telemetry { background: linear-gradient(90deg, #65d6a6, #5fd3ff); border-top: 1px dashed rgba(255,255,255,.5); }
+    .map-stage {
+      position: relative;
+      display: grid;
+      grid-template-columns: minmax(220px, .8fr) minmax(300px, 1.15fr) minmax(270px, 1fr);
+      grid-template-rows: auto auto auto;
+      gap: 16px;
+      min-height: 620px;
+    }
+    .map-card {
+      border: 1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(10,13,20,.92), rgba(7,9,14,.78));
+      border-radius: 24px;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.04);
+      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+    }
+    .map-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,.07), transparent 32%);
+      pointer-events: none;
+    }
+    .map-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255,91,53,.45);
+    }
+    .map-card.active,
+    .map-node.active,
+    .topic.active,
+    .signoz-chip.active,
+    .alert-strip.active .alert-row {
+      border-color: rgba(255,91,53,.9) !important;
+      box-shadow: 0 0 0 1px rgba(255,91,53,.28), 0 18px 48px rgba(255,91,53,.16);
+      transform: translateY(-2px) scale(1.01);
+    }
+    .map-label {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+      position: relative;
+      z-index: 1;
+    }
+    .map-label b {
+      font-size: 13px;
+      letter-spacing: -.01em;
+    }
+    .map-label span {
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .13em;
+    }
+    .map-node {
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 18px;
+      background: rgba(255,255,255,.045);
+      padding: 12px;
+      min-height: 72px;
+      position: relative;
+      z-index: 1;
+      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+    }
+    .map-node strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+    .map-node small {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+    }
+    .entry-card { grid-column: 1; grid-row: 1; }
+    .sync-card { grid-column: 2; grid-row: 1; }
+    .kafka-card { grid-column: 1 / span 2; grid-row: 2; }
+    .consumer-card { grid-column: 1 / span 2; grid-row: 3; }
+    .storage-card { grid-column: 3; grid-row: 1; }
+    .observe-card { grid-column: 3; grid-row: 2 / span 2; }
+    .node-stack {
+      display: grid;
+      gap: 10px;
+    }
+    .node-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .node-grid.two {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .entry-path .map-node:not(:last-child)::after {
+      content: "↓";
+      position: absolute;
+      left: 50%;
+      bottom: -22px;
+      transform: translateX(-50%);
+      color: rgba(110,168,255,.85);
+      font-weight: 800;
+    }
+    .checkout-root {
+      background: linear-gradient(135deg, rgba(255,91,53,.20), rgba(255,255,255,.045));
+    }
+    .kafka-bus {
+      position: relative;
+      z-index: 1;
+      border: 1px solid rgba(255,184,107,.40);
+      border-radius: 24px;
+      padding: 16px;
+      background:
+        linear-gradient(90deg, rgba(255,184,107,.13), rgba(255,91,53,.11)),
+        rgba(0,0,0,.16);
+    }
+    .bus-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .bus-title strong {
+      font-size: 17px;
+      letter-spacing: -.03em;
+    }
+    .bus-title span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .topics {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .topic {
+      border: 1px solid rgba(255,184,107,.22);
+      border-radius: 16px;
+      padding: 11px;
+      background: rgba(0,0,0,.22);
+      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+    }
+    .topic b {
+      display: block;
+      font-size: 12px;
+      word-break: break-word;
+    }
+    .topic small {
+      color: var(--muted);
+      font-size: 10.5px;
+    }
+    .mini-chart {
+      display: flex;
+      align-items: end;
+      gap: 4px;
+      height: 34px;
+      margin-top: 10px;
+    }
+    .mini-chart i {
+      display: block;
+      width: 12px;
+      border-radius: 6px 6px 2px 2px;
+      background: linear-gradient(180deg, rgba(95,211,255,.9), rgba(101,214,166,.65));
+      opacity: .82;
+    }
+    .signoz-suite {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 12px;
+    }
+    .signoz-hero {
+      min-height: 112px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      background:
+        radial-gradient(circle at 12% 18%, rgba(255,91,53,.28), transparent 34%),
+        linear-gradient(135deg, rgba(255,91,53,.14), rgba(95,211,255,.08));
+    }
+    .sig-eye {
+      width: 68px;
+      height: 68px;
+      border-radius: 24px;
+      display: grid;
+      place-items: center;
+      background: rgba(255,91,53,.16);
+      border: 1px solid rgba(255,91,53,.38);
+      font-size: 28px;
+      box-shadow: 0 14px 34px rgba(255,91,53,.16);
+    }
+    .signoz-chips {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+    }
+    .signoz-chip {
+      border: 1px solid rgba(255,255,255,.10);
+      border-radius: 16px;
+      padding: 10px;
+      background: rgba(255,255,255,.045);
+      min-height: 72px;
+      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+    }
+    .signoz-chip b {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 4px;
+    }
+    .signoz-chip small {
+      color: var(--muted);
+      font-size: 10.5px;
+      line-height: 1.35;
+    }
+    .alert-strip {
+      display: grid;
+      gap: 8px;
+    }
+    .alert-row {
+      border: 1px solid rgba(255,209,102,.20);
+      border-radius: 14px;
+      padding: 9px 10px;
+      background: rgba(255,209,102,.065);
+      color: #f5ead1;
+      font-size: 11.5px;
+    }
+    .telemetry-ribbon {
+      position: absolute;
+      inset: auto 14px 14px;
+      border: 1px dashed rgba(101,214,166,.32);
+      border-radius: 18px;
+      padding: 9px 11px;
+      color: var(--muted);
+      font-size: 11px;
+      background: rgba(101,214,166,.045);
+      z-index: 1;
+    }
+    .connector {
+      position: absolute;
+      pointer-events: none;
+      opacity: .7;
+      z-index: 0;
+    }
+    .connector.horizontal {
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(110,168,255,.9), transparent);
+      animation: shimmer 2.8s linear infinite;
+    }
+    .connector.kafka {
+      height: 3px;
+      background: linear-gradient(90deg, transparent, rgba(255,184,107,.85), rgba(255,91,53,.85), transparent);
+      animation: shimmer 2.2s linear infinite;
+    }
+    .connector.telemetry {
+      border-top: 2px dashed rgba(101,214,166,.65);
+      animation: shimmer 3.2s linear infinite;
+    }
+    .c1 { top: 92px; left: 22%; width: 18%; }
+    .c2 { top: 250px; left: 24%; width: 33%; }
+    .c3 { top: 410px; left: 24%; width: 33%; }
+    .c4 { top: 560px; left: 42%; width: 42%; }
+    .c5 { top: 304px; left: 61%; width: 24%; transform: rotate(90deg); transform-origin: left center; }
     .event-log {
       padding: 0;
       max-height: 360px;
@@ -533,10 +831,17 @@ HTML = """
       .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: none; }
       .node { grid-column: auto !important; grid-row: auto !important; min-height: 78px; }
       .rail { display: none; }
+      .map-stage { grid-template-columns: 1fr; min-height: auto; }
+      .entry-card, .sync-card, .kafka-card, .consumer-card, .storage-card, .observe-card {
+        grid-column: auto;
+        grid-row: auto;
+      }
+      .connector { display: none; }
     }
     @media (max-width: 620px) {
       header { align-items: flex-start; flex-direction: column; }
       .scenario-grid, .services, .status-row { grid-template-columns: 1fr; }
+      .node-grid, .node-grid.two, .topics, .signoz-chips { grid-template-columns: 1fr; }
       .stat { border-right: 0; border-bottom: 1px solid var(--line); }
     }
   </style>
@@ -551,7 +856,7 @@ HTML = """
       </div>
     </div>
     <div class="top-actions">
-      <a class="button" href="http://localhost:8080" target="_blank" rel="noreferrer">Open SigNoz</a>
+      <a class="button" href="http://127.0.0.1:8080" target="_blank" rel="noreferrer">Open SigNoz</a>
       <button class="button primary" id="refresh">Refresh status</button>
     </div>
   </header>
@@ -597,25 +902,100 @@ HTML = """
         <div class="section-head">
           <div>
             <h3>Architecture map</h3>
-            <p>Synchronous checkout, async Kafka fan-out, and observability export.</p>
+            <p>HTTP checkout path, Kafka event bus, async consumers, and SigNoz observability plane.</p>
           </div>
         </div>
-        <div class="architecture">
-          <div class="rail r1"></div>
-          <div class="rail r2"></div>
-          <div class="rail r3"></div>
-          <div class="flow">
-            <div class="node client"><b>Browser</b><small>you</small></div>
-            <div class="node ui hot"><b>ui-service</b><small>scenario proxy</small></div>
-            <div class="node checkout hot"><b>checkout</b><small>workflow root</small></div>
-            <div class="node sync"><span>cart</span><span>inventory</span><span>payment</span><span>postgres</span></div>
-            <div class="node kafka1 hot"><b>fraud.check.requested</b><small>Redpanda topic</small></div>
-            <div class="node fraud hot"><b>ai-fraud-service</b><small>rules inference</small></div>
-            <div class="node kafka2 hot"><b>fraud.check.completed / dlq</b><small>Kafka fan-out</small></div>
-            <div class="node notify"><b>notification-service</b><small>email simulation</small></div>
-            <div class="node analytics"><b>analytics-service</b><small>business events</small></div>
-            <div class="node storage"><b>Postgres · Redis</b><small>orders, carts, analytics</small></div>
-            <div class="node signoz hot"><b>SigNoz</b><small>logs · metrics · traces · alerts</small></div>
+        <div class="system-map">
+          <div class="map-legend">
+            <span class="legend-pill"><i class="legend-line http"></i>HTTP sync calls</span>
+            <span class="legend-pill"><i class="legend-line kafka"></i>Kafka / Redpanda events</span>
+            <span class="legend-pill"><i class="legend-line telemetry"></i>OTLP telemetry export</span>
+          </div>
+
+          <div class="map-stage">
+            <div class="connector horizontal c1"></div>
+            <div class="connector kafka c2"></div>
+            <div class="connector kafka c3"></div>
+            <div class="connector telemetry c4"></div>
+            <div class="connector telemetry c5"></div>
+
+            <div class="map-card entry-card" data-node="entry">
+              <div class="map-label"><b>Entry path</b><span>user → app</span></div>
+              <div class="node-stack entry-path">
+                <div class="map-node" data-node="browser"><strong>Browser</strong><small>You open ObserveAI and trigger experiments.</small></div>
+                <div class="map-node" data-node="ui"><strong>ui-service</strong><small>Scenario launcher, status proxy, and trace producer.</small></div>
+                <div class="map-node checkout-root" data-node="checkout"><strong>checkout-service</strong><small>Root workflow that calls sync services and publishes events.</small></div>
+              </div>
+            </div>
+
+            <div class="map-card sync-card" data-node="sync">
+              <div class="map-label"><b>Synchronous dependencies</b><span>request path</span></div>
+              <div class="node-grid">
+                <div class="map-node" data-node="cart"><strong>cart-service</strong><small>Cart lookup and cart seed operations.</small></div>
+                <div class="map-node" data-node="inventory"><strong>inventory-service</strong><small>Stock reservation and out-of-stock failures.</small></div>
+                <div class="map-node" data-node="payment"><strong>payment-service</strong><small>Slow payments, failures, and provider timeouts.</small></div>
+              </div>
+            </div>
+
+            <div class="map-card storage-card" data-node="storage">
+              <div class="map-label"><b>State layer</b><span>data stores</span></div>
+              <div class="node-stack">
+                <div class="map-node" data-node="postgres"><strong>Postgres</strong><small>Orders, inventory state, analytics events, slow query scenarios.</small></div>
+                <div class="map-node" data-node="redis"><strong>Redis</strong><small>Cart/session style cache for fast reads.</small></div>
+                <div class="mini-chart" aria-label="storage activity">
+                  <i style="height: 38%"></i><i style="height: 64%"></i><i style="height: 44%"></i><i style="height: 82%"></i><i style="height: 58%"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="map-card kafka-card" data-node="kafka">
+              <div class="map-label"><b>Event streaming backbone</b><span>async path</span></div>
+              <div class="kafka-bus">
+                <div class="bus-title">
+                  <strong>Redpanda / Kafka-compatible bus</strong>
+                  <span>producer latency · consumer lag · DLQ</span>
+                </div>
+                <div class="topics">
+                  <div class="topic" data-node="fraud-topic"><b>fraud.check.requested</b><small>checkout produces fraud work</small></div>
+                  <div class="topic" data-node="fraud-completed"><b>fraud.check.completed</b><small>AI fraud result events</small></div>
+                  <div class="topic" data-node="dlq"><b>fraud.check.dlq</b><small>poison messages and retries</small></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="map-card consumer-card" data-node="consumers">
+              <div class="map-label"><b>Async consumers</b><span>event handlers</span></div>
+              <div class="node-grid">
+                <div class="map-node" data-node="fraud"><strong>ai-fraud-service</strong><small>Rule-based inference, risk score, model latency, failures.</small></div>
+                <div class="map-node" data-node="notification"><strong>notification-service</strong><small>Email simulation, provider failure, slow consumer scenarios.</small></div>
+                <div class="map-node" data-node="analytics"><strong>analytics-service</strong><small>Business event processing and analytics lag.</small></div>
+              </div>
+            </div>
+
+            <div class="map-card observe-card" data-node="signoz">
+              <div class="map-label"><b>Observability plane</b><span>evidence</span></div>
+              <div class="signoz-suite">
+                <div class="map-node signoz-hero" data-node="otel">
+                  <div>
+                    <strong>OpenTelemetry Collector → SigNoz</strong>
+                    <small>Every service exports spans, logs, and metrics through OTLP.</small>
+                  </div>
+                  <div class="sig-eye">◉</div>
+                </div>
+                <div class="signoz-chips">
+                  <div class="signoz-chip" data-node="traces"><b>Traces</b><small>Follow one checkout across HTTP, Kafka, AI, and storage.</small></div>
+                  <div class="signoz-chip" data-node="logs"><b>Logs</b><small>Error messages, scenario names, order IDs, and failures.</small></div>
+                  <div class="signoz-chip" data-node="metrics"><b>Metrics</b><small>p50/p90/p99 latency, request counts, error rates.</small></div>
+                  <div class="signoz-chip" data-node="dashboards"><b>Dashboards</b><small>Checkout, Kafka, AI services, and business health panels.</small></div>
+                </div>
+                <div class="alert-strip" data-node="alerts">
+                  <div class="alert-row">Alert: checkout p99 latency high</div>
+                  <div class="alert-row">Alert: Kafka consumer lag / DLQ messages</div>
+                  <div class="alert-row">Alert: AI fraud inference slow or failing</div>
+                </div>
+              </div>
+              <div class="telemetry-ribbon">OTLP signals: traces · logs · metrics · exceptions</div>
+            </div>
           </div>
         </div>
       </section>
@@ -647,6 +1027,20 @@ HTML = """
       analytics_slow: "Analytics consumer delay.",
       db_slow: "Postgres slow query."
     };
+    const scenarioNodes = {
+      normal: ["entry", "checkout", "kafka", "fraud-topic", "fraud", "notification", "analytics", "signoz", "traces", "metrics", "dashboards"],
+      payment_slow: ["checkout", "payment", "signoz", "traces", "metrics", "dashboards", "alerts"],
+      payment_fail: ["checkout", "payment", "signoz", "logs", "traces", "alerts"],
+      provider_timeout: ["checkout", "payment", "signoz", "logs", "metrics", "alerts"],
+      inventory_fail: ["checkout", "inventory", "signoz", "logs", "traces"],
+      fraud_ai_slow: ["checkout", "kafka", "fraud-topic", "fraud", "signoz", "traces", "metrics", "dashboards", "alerts"],
+      kafka_consumer_slow: ["checkout", "kafka", "fraud-topic", "fraud", "signoz", "metrics", "dashboards", "alerts"],
+      poison_message: ["checkout", "kafka", "fraud-topic", "fraud", "dlq", "signoz", "logs", "alerts"],
+      notification_slow: ["kafka", "fraud-completed", "notification", "signoz", "traces", "dashboards"],
+      notification_fail: ["kafka", "fraud-completed", "notification", "signoz", "logs", "alerts"],
+      analytics_slow: ["kafka", "fraud-completed", "analytics", "signoz", "metrics", "dashboards"],
+      db_slow: ["checkout", "postgres", "signoz", "traces", "metrics", "dashboards", "alerts"]
+    };
     const scenarios = Object.keys(scenarioDetails);
     const servicesEl = document.querySelector("#services");
     const scenariosEl = document.querySelector("#scenarios");
@@ -667,6 +1061,18 @@ HTML = """
       lastCodeEl.textContent = code;
     }
 
+    function highlightScenario(name) {
+      document.querySelectorAll("[data-node]").forEach(el => el.classList.remove("active"));
+      const nodes = scenarioNodes[name] || [];
+      for (const node of nodes) {
+        document.querySelectorAll(`[data-node="${node}"]`).forEach(el => el.classList.add("active"));
+      }
+      window.clearTimeout(window.__observeAiHighlightTimer);
+      window.__observeAiHighlightTimer = window.setTimeout(() => {
+        document.querySelectorAll("[data-node]").forEach(el => el.classList.remove("active"));
+      }, 5200);
+    }
+
     async function refreshServices() {
       servicesEl.innerHTML = "";
       const res = await fetch("/api/services");
@@ -685,6 +1091,7 @@ HTML = """
     }
 
     async function triggerScenario(name) {
+      highlightScenario(name);
       addEvent(name, "Triggering scenario…");
       const res = await fetch("/api/scenarios", {
         method: "POST",

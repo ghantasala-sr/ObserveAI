@@ -11,7 +11,7 @@ This version is intentionally not an AI copilot yet. First we build the system t
 - PostgreSQL for ObserveAI orders and fraud results.
 - Redis for cart/cache state.
 - Continuous traffic generator for live SigNoz metrics.
-- Local web UI for scenario triggering and architecture exploration.
+- Local web UI for scenario triggering, service health, and a pictorial architecture map.
 - OpenTelemetry traces, metrics, and logs.
 - Trace context propagation across HTTP and Kafka headers.
 - Privacy-safe structured JSON logs with trace and span ids.
@@ -89,11 +89,18 @@ The ObserveAI web UI is exposed at:
 http://localhost:18082
 ```
 
+If `localhost` gives a connection reset on your machine, use the explicit loopback address:
+
+```text
+http://127.0.0.1:18082
+```
+
 Use it to:
 
 - check service health
 - trigger demo scenarios
-- inspect the architecture map
+- inspect the pictorial architecture map across HTTP, Kafka/Redpanda, async consumers, storage, OpenTelemetry, and SigNoz
+- see how each scenario maps to traces, metrics, dashboards, and alerts
 - jump into SigNoz
 
 ## Try A Normal Checkout

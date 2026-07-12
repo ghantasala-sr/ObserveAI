@@ -529,7 +529,7 @@ Notes / follow-ups:
 
 ## 2026-07-12 - ObserveAI Web UI And Architecture Map
 
-Commit: pending until pushed
+Commit: `e3a3508 Add ObserveAI web UI and architecture map`
 
 What changed:
 
@@ -571,15 +571,59 @@ Notes / follow-ups:
 - Open `http://localhost:18082` and use it as the main demo surface.
 - Next useful improvement: add a small live “last trace/order id” panel or dashboard deep links.
 
+## 2026-07-12 - Pictorial Kafka And SigNoz Architecture UI
+
+Commit: pending until pushed
+
+What changed:
+
+- Reworked the UI architecture section into a more pictorial system map.
+- Added explicit visual areas for:
+  - browser and `ui-service`
+  - `checkout-service`
+  - synchronous dependencies: cart, inventory, payment
+  - state layer: PostgreSQL and Redis
+  - Redpanda / Kafka-compatible event bus
+  - Kafka topics: `fraud.check.requested`, `fraud.check.completed`, `fraud.check.dlq`
+  - async consumers: AI fraud, notification, analytics
+  - OpenTelemetry Collector and SigNoz
+  - SigNoz traces, logs, metrics, dashboards, and alerts
+- Added a legend for HTTP sync calls, Kafka events, and OTLP telemetry.
+- Added scenario-based highlighting so clicking a scenario lights up the affected parts of the architecture.
+- Updated README to describe the richer UI and note `http://127.0.0.1:18082` as the safer local URL if `localhost` resets.
+
+Why:
+
+- The previous map was useful but still felt like a simple box diagram.
+- We wanted the UI to teach the full observability story visually: request path, async event path, storage, telemetry export, dashboards, and alerts.
+- Scenario highlighting makes the UI more useful for demos because it connects “what I triggered” to “where I should look in SigNoz.”
+
+Validation:
+
+- Ran `python3 -m compileall services/ui/main.py`.
+- Rebuilt and restarted `ui-service` with Docker Compose.
+- Confirmed `http://127.0.0.1:18082/health` returns healthy.
+- Confirmed the page contains the new Redpanda/Kafka, OpenTelemetry Collector, dashboard, alert, and DLQ architecture content.
+- Triggered `payment_slow` through the UI API successfully.
+- Ran `tests/smoke_test.sh` successfully.
+- Verified fresh `ui-service`, `checkout-service`, and `payment-service` spans in SigNoz ClickHouse.
+
+Notes / follow-ups:
+
+- If `localhost:18082` resets on macOS, use `127.0.0.1:18082`.
+- Next useful UI improvement: show the last order id and trace helper directly inside the page.
+- Another good next UI improvement: add links/buttons that open the relevant SigNoz dashboard or alert docs.
+
 ## Next Best Steps
 
 Recommended next steps:
 
-1. Add the `ObserveAI Downstream Consumers` dashboard in SigNoz.
-2. Create notification and analytics alerts from `alerts/README.md`.
-3. Add dashboard deep links or trace-id helpers to the UI.
-4. Add a rules-based recommendation service.
-5. Later, add SigNoz MCP and build the SRE Sidekick copilot.
+1. Add a live “last order id / trace helper” panel to the UI.
+2. Add dashboard deep links or alert setup links to the UI.
+3. Add the `ObserveAI Downstream Consumers` dashboard in SigNoz.
+4. Create notification and analytics alerts from `alerts/README.md`.
+5. Add a rules-based recommendation service.
+6. Later, add SigNoz MCP and build the SRE Sidekick copilot.
 
 ## Journal Template For Future Work
 

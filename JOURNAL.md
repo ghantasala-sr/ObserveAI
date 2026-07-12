@@ -721,7 +721,10 @@ Validation:
 
 Notes / follow-ups:
 
-- We still need to enable MCP in the actual local SigNoz Foundry deployment.
+- MCP was later enabled in the actual local SigNoz Foundry deployment at `/Users/srinivasarithikghantasala/Documents/signoz/casting.yaml`.
+- Foundry started the `signoz-mcp` container and exposed it on `http://localhost:8000`.
+- `bash scripts/check_mcp.sh` now reports MCP livez as OK.
+- `GET http://localhost:8000/mcp` correctly returns `401` until a SigNoz API key is provided.
 - We still need to create a SigNoz service-account API key locally.
 - Once connected, try prompts like “Investigate the latest payment_slow scenario” and “Find Kafka lag or DLQ evidence.”
 

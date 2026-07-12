@@ -772,6 +772,16 @@ HTML = """
       font-size: 12px;
       margin-bottom: 3px;
     }
+    .mcp-mini {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 9px;
+    }
+    .mcp-mini .signoz-chip {
+      min-height: 64px;
+      border-color: rgba(177,139,255,.18);
+      background: rgba(177,139,255,.055);
+    }
     .telemetry-ribbon {
       position: absolute;
       inset: auto 14px 14px;
@@ -987,6 +997,87 @@ HTML = """
     .button.ghost {
       background: rgba(255,255,255,.035);
     }
+    .ai-layer {
+      padding: 20px;
+      display: grid;
+      gap: 16px;
+    }
+    .ai-flow {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      align-items: stretch;
+    }
+    .ai-node {
+      border: 1px solid rgba(177,139,255,.18);
+      border-radius: 22px;
+      padding: 16px;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(177,139,255,.16), transparent 34%),
+        rgba(0,0,0,.18);
+      min-height: 120px;
+      position: relative;
+      overflow: hidden;
+    }
+    .ai-node::after {
+      content: "→";
+      position: absolute;
+      right: -9px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: rgba(177,139,255,.65);
+      font-size: 28px;
+      z-index: 2;
+    }
+    .ai-node:last-child::after { display: none; }
+    .ai-node span {
+      display: inline-flex;
+      margin-bottom: 12px;
+      color: #dcd2ff;
+      font-size: 11px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .ai-node strong {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 8px;
+      letter-spacing: -.02em;
+    }
+    .ai-node p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12.5px;
+      line-height: 1.5;
+    }
+    .prompt-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+    .prompt-card {
+      border: 1px solid rgba(255,255,255,.09);
+      border-radius: 18px;
+      padding: 13px;
+      background: rgba(0,0,0,.18);
+      color: #dfe6f2;
+      font-size: 12px;
+      line-height: 1.45;
+    }
+    .mcp-status {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .mcp-status span {
+      border: 1px solid rgba(101,214,166,.22);
+      border-radius: 999px;
+      padding: 7px 10px;
+      background: rgba(101,214,166,.055);
+      color: #d9f8eb;
+    }
     .event {
       display: grid;
       grid-template-columns: 92px 1fr;
@@ -1042,6 +1133,8 @@ HTML = """
       .scenario-grid, .services, .status-row { grid-template-columns: 1fr; }
       .node-grid, .node-grid.two, .topics, .signoz-chips { grid-template-columns: 1fr; }
       .trace-summary, .trace-body { grid-template-columns: 1fr; }
+      .ai-flow, .prompt-grid, .mcp-mini { grid-template-columns: 1fr; }
+      .ai-node::after { display: none; }
       .stat { border-right: 0; border-bottom: 1px solid var(--line); }
     }
   </style>
@@ -1201,8 +1294,12 @@ HTML = """
                   <b>SigNoz capture</b>
                   Waiting for a scenario. When you trigger one, telemetry pulses flow into traces, metrics, dashboards, logs, and alerts.
                 </div>
+                <div class="mcp-mini">
+                  <div class="signoz-chip" data-node="mcp"><b>SigNoz MCP</b><small>Exposes telemetry tools for AI investigation.</small></div>
+                  <div class="signoz-chip" data-node="codex"><b>Codex</b><small>Queries traces, logs, metrics, dashboards, and alerts.</small></div>
+                </div>
               </div>
-              <div class="telemetry-ribbon">OTLP signals: traces · logs · metrics · exceptions</div>
+              <div class="telemetry-ribbon">OTLP signals → SigNoz evidence → MCP tools → Codex investigation</div>
             </div>
           </div>
         </div>
@@ -1219,6 +1316,49 @@ HTML = """
         <div class="trace-helper" id="trace-helper">
           <div class="trace-empty">
             Run a scenario to generate an order id, investigation checklist, and a copyable ClickHouse query for SigNoz.
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <div>
+            <h3>AI investigation layer</h3>
+            <p>Codex connects to SigNoz through MCP. The browser never sees your API key.</p>
+          </div>
+          <a class="button" href="http://localhost:8000/livez" target="_blank" rel="noreferrer">MCP health</a>
+        </div>
+        <div class="ai-layer">
+          <div class="mcp-status">
+            <span>SigNoz MCP: http://localhost:8000/mcp</span>
+            <span>Codex MCP server: signoz</span>
+            <span>Tools: traces · logs · metrics · dashboards · alerts</span>
+          </div>
+          <div class="ai-flow">
+            <div class="ai-node" data-node="signoz">
+              <span>Evidence store</span>
+              <strong>SigNoz</strong>
+              <p>Stores ObserveAI traces, logs, metrics, dashboards, alerts, and service topology.</p>
+            </div>
+            <div class="ai-node" data-node="mcp">
+              <span>Access layer</span>
+              <strong>SigNoz MCP</strong>
+              <p>Turns SigNoz capabilities into tools an AI assistant can call safely.</p>
+            </div>
+            <div class="ai-node" data-node="codex">
+              <span>Investigator</span>
+              <strong>Codex</strong>
+              <p>Uses MCP to list services, inspect traces, suggest dashboards, and reason about incidents.</p>
+            </div>
+          </div>
+          <div class="trace-card">
+            <h4>Try these in Codex</h4>
+            <div class="prompt-grid">
+              <div class="prompt-card">Using SigNoz MCP, list the ObserveAI services currently sending telemetry.</div>
+              <div class="prompt-card">Using SigNoz MCP, investigate the latest payment_slow scenario and identify the bottleneck span.</div>
+              <div class="prompt-card">Using SigNoz MCP, check for fraud.check.dlq or poison_message activity in the last hour.</div>
+              <div class="prompt-card">Using SigNoz MCP, create an ObserveAI AI & Payments dashboard with payment and fraud latency panels.</div>
+            </div>
           </div>
         </div>
       </section>
@@ -1251,18 +1391,18 @@ HTML = """
       db_slow: "Postgres slow query."
     };
     const scenarioNodes = {
-      normal: ["entry", "checkout", "kafka", "fraud-topic", "fraud", "notification", "analytics", "signoz", "traces", "metrics", "dashboards"],
-      payment_slow: ["checkout", "payment", "signoz", "traces", "metrics", "dashboards", "alerts"],
-      payment_fail: ["checkout", "payment", "signoz", "logs", "traces", "alerts"],
-      provider_timeout: ["checkout", "payment", "signoz", "logs", "metrics", "alerts"],
-      inventory_fail: ["checkout", "inventory", "signoz", "logs", "traces"],
-      fraud_ai_slow: ["checkout", "kafka", "fraud-topic", "fraud", "signoz", "traces", "metrics", "dashboards", "alerts"],
-      kafka_consumer_slow: ["checkout", "kafka", "fraud-topic", "fraud", "signoz", "metrics", "dashboards", "alerts"],
-      poison_message: ["checkout", "kafka", "fraud-topic", "fraud", "dlq", "signoz", "logs", "alerts"],
-      notification_slow: ["kafka", "fraud-completed", "notification", "signoz", "traces", "dashboards"],
-      notification_fail: ["kafka", "fraud-completed", "notification", "signoz", "logs", "alerts"],
-      analytics_slow: ["kafka", "fraud-completed", "analytics", "signoz", "metrics", "dashboards"],
-      db_slow: ["checkout", "postgres", "signoz", "traces", "metrics", "dashboards", "alerts"]
+      normal: ["entry", "checkout", "kafka", "fraud-topic", "fraud", "notification", "analytics", "signoz", "traces", "metrics", "dashboards", "mcp", "codex"],
+      payment_slow: ["checkout", "payment", "signoz", "traces", "metrics", "dashboards", "alerts", "mcp", "codex"],
+      payment_fail: ["checkout", "payment", "signoz", "logs", "traces", "alerts", "mcp", "codex"],
+      provider_timeout: ["checkout", "payment", "signoz", "logs", "metrics", "alerts", "mcp", "codex"],
+      inventory_fail: ["checkout", "inventory", "signoz", "logs", "traces", "mcp", "codex"],
+      fraud_ai_slow: ["checkout", "kafka", "fraud-topic", "fraud", "signoz", "traces", "metrics", "dashboards", "alerts", "mcp", "codex"],
+      kafka_consumer_slow: ["checkout", "kafka", "fraud-topic", "fraud", "signoz", "metrics", "dashboards", "alerts", "mcp", "codex"],
+      poison_message: ["checkout", "kafka", "fraud-topic", "fraud", "dlq", "signoz", "logs", "alerts", "mcp", "codex"],
+      notification_slow: ["kafka", "fraud-completed", "notification", "signoz", "traces", "dashboards", "mcp", "codex"],
+      notification_fail: ["kafka", "fraud-completed", "notification", "signoz", "logs", "alerts", "mcp", "codex"],
+      analytics_slow: ["kafka", "fraud-completed", "analytics", "signoz", "metrics", "dashboards", "mcp", "codex"],
+      db_slow: ["checkout", "postgres", "signoz", "traces", "metrics", "dashboards", "alerts", "mcp", "codex"]
     };
     const flowStories = {
       normal: {
@@ -1270,54 +1410,54 @@ HTML = """
         capture: "Healthy baseline captured: checkout trace, Kafka publish/consume spans, normal latency, and business events.",
         request: ["browser", "ui", "checkout", "cart", "checkout", "inventory", "checkout", "payment", "checkout"],
         kafka: ["checkout", "kafka", "fraud-topic", "fraud", "fraud-completed", "notification", "fraud-completed", "analytics"],
-        telemetry: ["checkout", "otel", "signoz", "traces", "metrics", "dashboards"]
+        telemetry: ["checkout", "otel", "signoz", "traces", "metrics", "dashboards", "mcp", "codex"]
       },
       payment_slow: {
         readout: "Payment slow: the request stalls in payment-service while telemetry reaches SigNoz as high p99 latency.",
         capture: "SigNoz catches slow payment spans, checkout p99 movement, and dashboard/alert evidence.",
         request: ["browser", "ui", "checkout", "payment", "checkout"],
-        telemetry: ["payment", "otel", "signoz", "traces", "metrics", "dashboards", "alerts"]
+        telemetry: ["payment", "otel", "signoz", "traces", "metrics", "dashboards", "alerts", "mcp", "codex"]
       },
       payment_fail: {
         readout: "Payment failure: checkout receives a failed payment response and SigNoz captures errors plus logs.",
         capture: "SigNoz catches payment error spans, failure logs, and alert-worthy checkout failures.",
         request: ["browser", "ui", "checkout", "payment", "checkout"],
-        telemetry: ["payment", "otel", "signoz", "traces", "logs", "alerts"],
+        telemetry: ["payment", "otel", "signoz", "traces", "logs", "alerts", "mcp", "codex"],
         error: true
       },
       provider_timeout: {
         readout: "Provider timeout: payment waits on a simulated provider timeout and observability records the timeout path.",
         capture: "SigNoz catches provider timeout logs, slow/error spans, and alert evidence for payment reliability.",
         request: ["browser", "ui", "checkout", "payment", "checkout"],
-        telemetry: ["payment", "otel", "signoz", "logs", "metrics", "alerts"],
+        telemetry: ["payment", "otel", "signoz", "logs", "metrics", "alerts", "mcp", "codex"],
         error: true
       },
       inventory_fail: {
         readout: "Inventory failure: inventory returns out-of-stock; SigNoz shows this as a business failure path.",
         capture: "SigNoz catches the inventory branch and logs, but this is business failure rather than infra outage.",
         request: ["browser", "ui", "checkout", "inventory", "checkout"],
-        telemetry: ["inventory", "otel", "signoz", "traces", "logs"]
+        telemetry: ["inventory", "otel", "signoz", "traces", "logs", "mcp", "codex"]
       },
       fraud_ai_slow: {
         readout: "AI fraud slow: checkout queues work, then the async fraud consumer becomes the bottleneck.",
         capture: "SigNoz catches fraud inference latency, Kafka consumer spans, and AI dashboard movement.",
         request: ["browser", "ui", "checkout", "payment", "checkout"],
         kafka: ["checkout", "kafka", "fraud-topic", "fraud", "fraud-completed"],
-        telemetry: ["fraud", "otel", "signoz", "traces", "metrics", "dashboards", "alerts"]
+        telemetry: ["fraud", "otel", "signoz", "traces", "metrics", "dashboards", "alerts", "mcp", "codex"]
       },
       kafka_consumer_slow: {
         readout: "Kafka lag: events enter the bus faster than the fraud consumer can process them.",
         capture: "SigNoz catches consumer lag signals, delayed fraud spans, dashboards, and lag alerts.",
         request: ["browser", "ui", "checkout"],
         kafka: ["checkout", "kafka", "fraud-topic", "fraud"],
-        telemetry: ["kafka", "otel", "signoz", "metrics", "dashboards", "alerts"]
+        telemetry: ["kafka", "otel", "signoz", "metrics", "dashboards", "alerts", "mcp", "codex"]
       },
       poison_message: {
         readout: "Poison message: fraud consumer retries and publishes to DLQ; SigNoz captures the failure chain.",
         capture: "SigNoz catches retry/error logs, DLQ publish spans, and alert-worthy poison-message behavior.",
         request: ["browser", "ui", "checkout"],
         kafka: ["checkout", "kafka", "fraud-topic", "fraud", "dlq"],
-        telemetry: ["fraud", "otel", "signoz", "logs", "alerts"],
+        telemetry: ["fraud", "otel", "signoz", "logs", "alerts", "mcp", "codex"],
         error: true
       },
       notification_slow: {
@@ -1325,14 +1465,14 @@ HTML = """
         capture: "SigNoz catches notification consumer delay and downstream dashboard evidence.",
         request: ["browser", "ui", "checkout"],
         kafka: ["checkout", "kafka", "fraud-topic", "fraud", "fraud-completed", "notification"],
-        telemetry: ["notification", "otel", "signoz", "traces", "dashboards"]
+        telemetry: ["notification", "otel", "signoz", "traces", "dashboards", "mcp", "codex"]
       },
       notification_fail: {
         readout: "Notification failure: the user checkout succeeds, but downstream notification records provider failure.",
         capture: "SigNoz catches notification provider errors without confusing them with checkout failure.",
         request: ["browser", "ui", "checkout"],
         kafka: ["checkout", "kafka", "fraud-topic", "fraud", "fraud-completed", "notification"],
-        telemetry: ["notification", "otel", "signoz", "logs", "alerts"],
+        telemetry: ["notification", "otel", "signoz", "logs", "alerts", "mcp", "codex"],
         error: true
       },
       analytics_slow: {
@@ -1340,13 +1480,13 @@ HTML = """
         capture: "SigNoz catches analytics consumer latency and business-event processing delay.",
         request: ["browser", "ui", "checkout"],
         kafka: ["checkout", "kafka", "fraud-topic", "fraud", "fraud-completed", "analytics"],
-        telemetry: ["analytics", "otel", "signoz", "metrics", "dashboards"]
+        telemetry: ["analytics", "otel", "signoz", "metrics", "dashboards", "mcp", "codex"]
       },
       db_slow: {
         readout: "Database slow: checkout spends time writing/reading Postgres; SigNoz captures DB span latency.",
         capture: "SigNoz catches slow Postgres spans, checkout p99 movement, and database dashboard evidence.",
         request: ["browser", "ui", "checkout", "postgres", "checkout"],
-        telemetry: ["postgres", "otel", "signoz", "traces", "metrics", "dashboards", "alerts"]
+        telemetry: ["postgres", "otel", "signoz", "traces", "metrics", "dashboards", "alerts", "mcp", "codex"]
       }
     };
     const investigationGuides = {
@@ -1595,7 +1735,7 @@ LIMIT 100;`;
       capturePanelEl.innerHTML = `<b>SigNoz capture</b> Listening for telemetry from this scenario…`;
       runPacket(story.error ? "error" : "", story.request || [], "HTTP", 0);
       if (story.kafka) runPacket("kafka", story.kafka, "Kafka", 650);
-      runPacket("telemetry", story.telemetry || ["checkout", "otel", "signoz"], "OTLP", 1100);
+      runPacket("telemetry", story.telemetry || ["checkout", "otel", "signoz", "mcp", "codex"], "OTLP", 1100);
       window.__observeAiCaptureTimer = window.setTimeout(() => {
         document.querySelector('[data-node="signoz"]')?.classList.add("capturing");
         capturePanelEl.innerHTML = `<b>SigNoz captured</b> ${story.capture}`;

@@ -103,6 +103,7 @@ Use it to:
 - watch each scenario animate through the architecture as HTTP packets, Kafka events, and OTLP telemetry pulses
 - see how each scenario maps to traces, metrics, dashboards, and alerts
 - use the Trace Helper to inspect the latest scenario, order id, likely bottleneck, SigNoz checklist, dashboard hint, alert candidate, and copyable ClickHouse query
+- understand the AI investigation loop: SigNoz evidence -> SigNoz MCP -> Codex investigator
 - jump into SigNoz
 
 ## Try A Normal Checkout

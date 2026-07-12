@@ -680,6 +680,10 @@ Validation:
 
 - Ran `python3 -m compileall services/ui/main.py`.
 - Parsed the inline browser JavaScript with `node --check`.
+- Confirmed the UI health endpoint returns OK at `http://127.0.0.1:18082/health`.
+- Confirmed the rendered page contains the new `AI investigation layer`, `SigNoz MCP`, `Codex`, and AI/Payments dashboard prompt content.
+- Ran `bash tests/smoke_test.sh` to generate fresh checkout, Kafka, fraud, notification, analytics, and failure-scenario telemetry.
+- Ran `bash scripts/check_mcp.sh && bash scripts/check_mcp_auth.sh` to confirm SigNoz MCP health and API-key access.
 - Rebuilt and restarted `ui-service`.
 - Confirmed `http://127.0.0.1:18082/health` returns healthy.
 - Confirmed the UI contains the Trace Helper section.
@@ -731,18 +735,50 @@ Notes / follow-ups:
 - Verified the API key and MCP auth header with `bash scripts/check_mcp_auth.sh`.
 - Once connected, try prompts like “Investigate the latest payment_slow scenario” and “Find Kafka lag or DLQ evidence.”
 
+## 2026-07-12 - UI AI Investigation Layer
+
+Commit: pending until pushed
+
+What changed:
+
+- Updated the ObserveAI UI to show the full AI-assisted observability loop:
+  - ObserveAI telemetry
+  - SigNoz evidence
+  - SigNoz MCP
+  - Codex investigator
+- Added `SigNoz MCP` and `Codex` nodes into the observability plane.
+- Added an `AI investigation layer` section with:
+  - MCP endpoint status/context
+  - Codex MCP server name
+  - available tool categories
+  - example prompts for service listing, payment investigation, DLQ checks, and dashboard creation
+- Updated scenario highlighting and telemetry animation paths so scenarios flow into MCP/Codex after SigNoz captures the evidence.
+
+Why:
+
+- MCP is now actually connected to Codex, so the UI should explain the complete learning loop.
+- This makes the system easier to demo: trigger an incident, watch telemetry move, inspect the trace helper, then ask Codex through SigNoz MCP.
+
+Validation:
+
+- Ran `python3 -m compileall services/ui/main.py`.
+- Parsed the inline browser JavaScript with `node --check`.
+
+Notes / follow-ups:
+
+- Next useful UI improvement: show a small “MCP connected” status from backend health checks instead of static text.
+- Later, the Trace Helper and MCP prompts can feed into the hackathon AI Agent Observability project.
+
 ## Next Best Steps
 
 Recommended next steps:
 
-1. Enable SigNoz MCP in the local Foundry `casting.yaml` and verify `http://localhost:8000/livez`.
-2. Connect Codex/Claude/Cursor to `http://localhost:8000/mcp`.
-3. Use MCP to investigate ObserveAI scenarios in natural language.
-4. Add dashboard deep links or alert setup links to the UI.
-5. Add the `ObserveAI Downstream Consumers` dashboard in SigNoz.
-6. Create notification and analytics alerts from `alerts/README.md`.
-7. Add a rules-based recommendation service.
-8. Later, build the separate hackathon AI Agent Observability project.
+1. Use SigNoz MCP to create or refine the `ObserveAI AI & Payments` dashboard.
+2. Add dashboard deep links or alert setup links to the UI.
+3. Add the `ObserveAI Downstream Consumers` dashboard in SigNoz.
+4. Create notification and analytics alerts from `alerts/README.md`.
+5. Add a rules-based recommendation service.
+6. Later, build the separate hackathon AI Agent Observability project.
 
 ## Journal Template For Future Work
 

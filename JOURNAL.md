@@ -771,7 +771,7 @@ Notes / follow-ups:
 
 ## 2026-07-12 - Fix Architecture Map Trimming
 
-Commit: pending until pushed
+Commit: `92e6328 Fix architecture map responsive layout`
 
 What changed:
 

@@ -100,6 +100,7 @@ Use it to:
 - check service health
 - trigger demo scenarios
 - inspect the pictorial architecture map across HTTP, Kafka/Redpanda, async consumers, storage, OpenTelemetry, and SigNoz
+- watch each scenario animate through the architecture as HTTP packets, Kafka events, and OTLP telemetry pulses
 - see how each scenario maps to traces, metrics, dashboards, and alerts
 - jump into SigNoz
 

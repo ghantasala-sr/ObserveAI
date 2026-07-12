@@ -561,6 +561,10 @@ HTML = """
       box-shadow: 0 0 0 1px rgba(255,91,53,.28), 0 18px 48px rgba(255,91,53,.16);
       transform: translateY(-2px) scale(1.01);
     }
+    .map-card.capturing {
+      border-color: rgba(101,214,166,.9);
+      box-shadow: 0 0 0 1px rgba(101,214,166,.22), 0 24px 70px rgba(101,214,166,.15);
+    }
     .map-label {
       display: flex;
       justify-content: space-between;
@@ -752,6 +756,22 @@ HTML = """
       color: #f5ead1;
       font-size: 11.5px;
     }
+    .capture-panel {
+      border: 1px solid rgba(101,214,166,.22);
+      border-radius: 16px;
+      padding: 11px 12px;
+      background: rgba(101,214,166,.06);
+      color: #daf8eb;
+      font-size: 11.5px;
+      line-height: 1.45;
+      min-height: 56px;
+    }
+    .capture-panel b {
+      display: block;
+      color: #fff;
+      font-size: 12px;
+      margin-bottom: 3px;
+    }
     .telemetry-ribbon {
       position: absolute;
       inset: auto 14px 14px;
@@ -788,6 +808,83 @@ HTML = """
     .c3 { top: 410px; left: 24%; width: 33%; }
     .c4 { top: 560px; left: 42%; width: 42%; }
     .c5 { top: 304px; left: 61%; width: 24%; transform: rotate(90deg); transform-origin: left center; }
+    .flow-readout {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(6,8,12,.78);
+      backdrop-filter: blur(12px);
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .flow-readout strong {
+      color: var(--text);
+      font-size: 12px;
+    }
+    .flow-readout .meter {
+      width: 110px;
+      height: 5px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.10);
+      overflow: hidden;
+      flex: 0 0 auto;
+    }
+    .flow-readout .meter i {
+      display: block;
+      width: 0%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--accent), var(--ok), var(--accent-2));
+    }
+    .flow-readout.running .meter i {
+      animation: fillMeter 5s ease both;
+    }
+    .flow-particle {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      left: 0;
+      top: 0;
+      z-index: 20;
+      pointer-events: none;
+      background: #6ea8ff;
+      box-shadow: 0 0 0 7px rgba(110,168,255,.14), 0 0 24px rgba(110,168,255,.72);
+    }
+    .flow-particle::after {
+      content: attr(data-label);
+      position: absolute;
+      left: 18px;
+      top: -5px;
+      white-space: nowrap;
+      color: #dce9ff;
+      font-size: 10px;
+      padding: 3px 7px;
+      border-radius: 999px;
+      background: rgba(6,8,12,.76);
+      border: 1px solid rgba(255,255,255,.10);
+    }
+    .flow-particle.kafka {
+      background: #ffb86b;
+      box-shadow: 0 0 0 7px rgba(255,184,107,.14), 0 0 24px rgba(255,184,107,.72);
+    }
+    .flow-particle.telemetry {
+      background: var(--ok);
+      box-shadow: 0 0 0 7px rgba(101,214,166,.14), 0 0 24px rgba(101,214,166,.72);
+    }
+    .flow-particle.error {
+      background: var(--bad);
+      box-shadow: 0 0 0 7px rgba(255,107,107,.14), 0 0 24px rgba(255,107,107,.72);
+    }
     .event-log {
       padding: 0;
       max-height: 360px;
@@ -823,6 +920,11 @@ HTML = """
       from { filter: hue-rotate(0deg); opacity: .35; }
       50% { opacity: .95; }
       to { filter: hue-rotate(30deg); opacity: .35; }
+    }
+    @keyframes fillMeter {
+      from { width: 0%; }
+      72% { width: 88%; }
+      to { width: 100%; }
     }
     @media (max-width: 980px) {
       header, main { padding-left: 18px; padding-right: 18px; }
@@ -918,6 +1020,10 @@ HTML = """
             <div class="connector kafka c3"></div>
             <div class="connector telemetry c4"></div>
             <div class="connector telemetry c5"></div>
+            <div class="flow-readout" id="flow-readout">
+              <span><strong>Flow simulator</strong> Click a scenario to animate request, Kafka, and telemetry capture.</span>
+              <span class="meter"><i></i></span>
+            </div>
 
             <div class="map-card entry-card" data-node="entry">
               <div class="map-label"><b>Entry path</b><span>user → app</span></div>
@@ -993,6 +1099,10 @@ HTML = """
                   <div class="alert-row">Alert: Kafka consumer lag / DLQ messages</div>
                   <div class="alert-row">Alert: AI fraud inference slow or failing</div>
                 </div>
+                <div class="capture-panel" id="capture-panel">
+                  <b>SigNoz capture</b>
+                  Waiting for a scenario. When you trigger one, telemetry pulses flow into traces, metrics, dashboards, logs, and alerts.
+                </div>
               </div>
               <div class="telemetry-ribbon">OTLP signals: traces · logs · metrics · exceptions</div>
             </div>
@@ -1041,12 +1151,100 @@ HTML = """
       analytics_slow: ["kafka", "fraud-completed", "analytics", "signoz", "metrics", "dashboards"],
       db_slow: ["checkout", "postgres", "signoz", "traces", "metrics", "dashboards", "alerts"]
     };
+    const flowStories = {
+      normal: {
+        readout: "Happy path: HTTP checkout completes, Kafka fans out fraud results, and SigNoz captures normal traces/metrics.",
+        capture: "Healthy baseline captured: checkout trace, Kafka publish/consume spans, normal latency, and business events.",
+        request: ["browser", "ui", "checkout", "cart", "checkout", "inventory", "checkout", "payment", "checkout"],
+        kafka: ["checkout", "kafka", "fraud-topic", "fraud", "fraud-completed", "notification", "fraud-completed", "analytics"],
+        telemetry: ["checkout", "otel", "signoz", "traces", "metrics", "dashboards"]
+      },
+      payment_slow: {
+        readout: "Payment slow: the request stalls in payment-service while telemetry reaches SigNoz as high p99 latency.",
+        capture: "SigNoz catches slow payment spans, checkout p99 movement, and dashboard/alert evidence.",
+        request: ["browser", "ui", "checkout", "payment", "checkout"],
+        telemetry: ["payment", "otel", "signoz", "traces", "metrics", "dashboards", "alerts"]
+      },
+      payment_fail: {
+        readout: "Payment failure: checkout receives a failed payment response and SigNoz captures errors plus logs.",
+        capture: "SigNoz catches payment error spans, failure logs, and alert-worthy checkout failures.",
+        request: ["browser", "ui", "checkout", "payment", "checkout"],
+        telemetry: ["payment", "otel", "signoz", "traces", "logs", "alerts"],
+        error: true
+      },
+      provider_timeout: {
+        readout: "Provider timeout: payment waits on a simulated provider timeout and observability records the timeout path.",
+        capture: "SigNoz catches provider timeout logs, slow/error spans, and alert evidence for payment reliability.",
+        request: ["browser", "ui", "checkout", "payment", "checkout"],
+        telemetry: ["payment", "otel", "signoz", "logs", "metrics", "alerts"],
+        error: true
+      },
+      inventory_fail: {
+        readout: "Inventory failure: inventory returns out-of-stock; SigNoz shows this as a business failure path.",
+        capture: "SigNoz catches the inventory branch and logs, but this is business failure rather than infra outage.",
+        request: ["browser", "ui", "checkout", "inventory", "checkout"],
+        telemetry: ["inventory", "otel", "signoz", "traces", "logs"]
+      },
+      fraud_ai_slow: {
+        readout: "AI fraud slow: checkout queues work, then the async fraud consumer becomes the bottleneck.",
+        capture: "SigNoz catches fraud inference latency, Kafka consumer spans, and AI dashboard movement.",
+        request: ["browser", "ui", "checkout", "payment", "checkout"],
+        kafka: ["checkout", "kafka", "fraud-topic", "fraud", "fraud-completed"],
+        telemetry: ["fraud", "otel", "signoz", "traces", "metrics", "dashboards", "alerts"]
+      },
+      kafka_consumer_slow: {
+        readout: "Kafka lag: events enter the bus faster than the fraud consumer can process them.",
+        capture: "SigNoz catches consumer lag signals, delayed fraud spans, dashboards, and lag alerts.",
+        request: ["browser", "ui", "checkout"],
+        kafka: ["checkout", "kafka", "fraud-topic", "fraud"],
+        telemetry: ["kafka", "otel", "signoz", "metrics", "dashboards", "alerts"]
+      },
+      poison_message: {
+        readout: "Poison message: fraud consumer retries and publishes to DLQ; SigNoz captures the failure chain.",
+        capture: "SigNoz catches retry/error logs, DLQ publish spans, and alert-worthy poison-message behavior.",
+        request: ["browser", "ui", "checkout"],
+        kafka: ["checkout", "kafka", "fraud-topic", "fraud", "dlq"],
+        telemetry: ["fraud", "otel", "signoz", "logs", "alerts"],
+        error: true
+      },
+      notification_slow: {
+        readout: "Notification slow: fraud completes, then notification processing delays downstream work.",
+        capture: "SigNoz catches notification consumer delay and downstream dashboard evidence.",
+        request: ["browser", "ui", "checkout"],
+        kafka: ["checkout", "kafka", "fraud-topic", "fraud", "fraud-completed", "notification"],
+        telemetry: ["notification", "otel", "signoz", "traces", "dashboards"]
+      },
+      notification_fail: {
+        readout: "Notification failure: the user checkout succeeds, but downstream notification records provider failure.",
+        capture: "SigNoz catches notification provider errors without confusing them with checkout failure.",
+        request: ["browser", "ui", "checkout"],
+        kafka: ["checkout", "kafka", "fraud-topic", "fraud", "fraud-completed", "notification"],
+        telemetry: ["notification", "otel", "signoz", "logs", "alerts"],
+        error: true
+      },
+      analytics_slow: {
+        readout: "Analytics slow: async business event processing lags after fraud completion.",
+        capture: "SigNoz catches analytics consumer latency and business-event processing delay.",
+        request: ["browser", "ui", "checkout"],
+        kafka: ["checkout", "kafka", "fraud-topic", "fraud", "fraud-completed", "analytics"],
+        telemetry: ["analytics", "otel", "signoz", "metrics", "dashboards"]
+      },
+      db_slow: {
+        readout: "Database slow: checkout spends time writing/reading Postgres; SigNoz captures DB span latency.",
+        capture: "SigNoz catches slow Postgres spans, checkout p99 movement, and database dashboard evidence.",
+        request: ["browser", "ui", "checkout", "postgres", "checkout"],
+        telemetry: ["postgres", "otel", "signoz", "traces", "metrics", "dashboards", "alerts"]
+      }
+    };
     const scenarios = Object.keys(scenarioDetails);
     const servicesEl = document.querySelector("#services");
     const scenariosEl = document.querySelector("#scenarios");
     const eventsEl = document.querySelector("#events");
     const okCountEl = document.querySelector("#ok-count");
     const lastCodeEl = document.querySelector("#last-code");
+    const mapStageEl = document.querySelector(".map-stage");
+    const flowReadoutEl = document.querySelector("#flow-readout");
+    const capturePanelEl = document.querySelector("#capture-panel");
 
     function pretty(name) {
       return name.replaceAll("_", " ").replace(/\\b\\w/g, c => c.toUpperCase());
@@ -1073,6 +1271,64 @@ HTML = """
       }, 5200);
     }
 
+    function centerOfNode(nodeName) {
+      const el = document.querySelector(`[data-node="${nodeName}"]`);
+      if (!el || !mapStageEl) return null;
+      const stageBox = mapStageEl.getBoundingClientRect();
+      const box = el.getBoundingClientRect();
+      return {
+        x: box.left - stageBox.left + box.width / 2,
+        y: box.top - stageBox.top + box.height / 2
+      };
+    }
+
+    function runPacket(kind, path, label, delay = 0) {
+      const points = path.map(centerOfNode).filter(Boolean);
+      if (points.length < 2 || !mapStageEl) return;
+      const particle = document.createElement("div");
+      particle.className = `flow-particle ${kind}`;
+      particle.dataset.label = label;
+      mapStageEl.appendChild(particle);
+      const keyframes = points.map((point, index) => ({
+        transform: `translate(${point.x - 7}px, ${point.y - 7}px) scale(${index === points.length - 1 ? 1.18 : 1})`,
+        opacity: index === 0 ? .25 : 1,
+        offset: index / (points.length - 1)
+      }));
+      const duration = Math.max(1500, Math.min(5200, points.length * 470));
+      const animation = particle.animate(keyframes, {
+        delay,
+        duration,
+        easing: "cubic-bezier(.16, 1, .3, 1)",
+        fill: "forwards"
+      });
+      animation.finished.then(() => {
+        particle.animate([{opacity: 1}, {opacity: 0, transform: keyframes.at(-1).transform + " scale(.6)"}], {
+          duration: 260,
+          fill: "forwards"
+        }).finished.then(() => particle.remove());
+      }).catch(() => particle.remove());
+    }
+
+    function simulateScenarioFlow(name) {
+      document.querySelectorAll(".flow-particle").forEach(el => el.remove());
+      document.querySelectorAll(".capturing").forEach(el => el.classList.remove("capturing"));
+      window.clearTimeout(window.__observeAiCaptureTimer);
+      const story = flowStories[name] || flowStories.normal;
+      highlightScenario(name);
+      flowReadoutEl.classList.remove("running");
+      void flowReadoutEl.offsetWidth;
+      flowReadoutEl.classList.add("running");
+      flowReadoutEl.querySelector("span").innerHTML = `<strong>Animating ${pretty(name)}</strong> ${story.readout}`;
+      capturePanelEl.innerHTML = `<b>SigNoz capture</b> Listening for telemetry from this scenario…`;
+      runPacket(story.error ? "error" : "", story.request || [], "HTTP", 0);
+      if (story.kafka) runPacket("kafka", story.kafka, "Kafka", 650);
+      runPacket("telemetry", story.telemetry || ["checkout", "otel", "signoz"], "OTLP", 1100);
+      window.__observeAiCaptureTimer = window.setTimeout(() => {
+        document.querySelector('[data-node="signoz"]')?.classList.add("capturing");
+        capturePanelEl.innerHTML = `<b>SigNoz captured</b> ${story.capture}`;
+      }, 2200);
+    }
+
     async function refreshServices() {
       servicesEl.innerHTML = "";
       const res = await fetch("/api/services");
@@ -1091,7 +1347,7 @@ HTML = """
     }
 
     async function triggerScenario(name) {
-      highlightScenario(name);
+      simulateScenarioFlow(name);
       addEvent(name, "Triggering scenario…");
       const res = await fetch("/api/scenarios", {
         method: "POST",

@@ -241,7 +241,7 @@ ObserveAI is now a realistic local observability lab with:
 
 ## 2026-07-11 - Continuous Traffic Generator
 
-Commit: pending until pushed
+Commit: `ab6c6d3 Enhance UI architecture map`
 
 We added a `traffic-generator` service so SigNoz has continuous data without manually running smoke tests.
 
@@ -613,6 +613,44 @@ Notes / follow-ups:
 - If `localhost:18082` resets on macOS, use `127.0.0.1:18082`.
 - Next useful UI improvement: show the last order id and trace helper directly inside the page.
 - Another good next UI improvement: add links/buttons that open the relevant SigNoz dashboard or alert docs.
+
+## 2026-07-12 - Scenario Flow Simulator In UI
+
+Commit: `bd84027 Animate scenario flows in UI`
+
+What changed:
+
+- Added animated scenario flows to the architecture map.
+- When a user triggers a scenario, the UI now animates:
+  - HTTP request movement through browser, UI, checkout, and sync dependencies
+  - Kafka / Redpanda event movement through topics and async consumers
+  - OTLP telemetry movement into the OpenTelemetry Collector and SigNoz
+- Added a flow readout that explains what the selected scenario is doing.
+- Added a SigNoz capture panel that explains what observability catches for that scenario.
+- Added different visual packet styles for:
+  - HTTP traffic
+  - Kafka events
+  - telemetry
+  - error/failure paths
+
+Why:
+
+- The user wanted to simulate not just the static architecture, but how a scenario moves through the system and how observability catches it.
+- This makes the UI a stronger learning surface: you can click `payment_slow`, `kafka_consumer_slow`, `poison_message`, etc., and visually connect the runtime path to traces, metrics, logs, dashboards, and alerts.
+
+Validation:
+
+- Ran `python3 -m compileall services/ui/main.py`.
+- Parsed the inline browser JavaScript with `node --check`.
+- Rebuilt and restarted `ui-service`.
+- Confirmed `http://127.0.0.1:18082/health` returns healthy.
+- Confirmed the page contains the new flow simulator and SigNoz capture content.
+- Triggered `kafka_consumer_slow` through the UI API successfully.
+
+Notes / follow-ups:
+
+- Next useful UI improvement: after a scenario completes, show the returned `order_id` in a dedicated trace helper panel.
+- After that, add direct links or instructions for the matching SigNoz dashboard and alert query.
 
 ## Next Best Steps
 

@@ -290,7 +290,7 @@ Notes / follow-ups:
 
 ## 2026-07-11 - Dashboard Query Pack
 
-Commit: pending until pushed
+Commit: `d4f3809 Add MCP investigation layer to UI`
 
 We added a first ObserveAI dashboard pack under `dashboards/`.
 

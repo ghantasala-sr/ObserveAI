@@ -799,6 +799,36 @@ Notes / follow-ups:
 - If we want an even better demo surface later, add a compact/fullscreen architecture toggle.
 - A dedicated “presentation mode” would make screenshots and blog images cleaner.
 
+## 2026-07-12 - Add Architecture Presentation Mode
+
+Commit: pending until pushed
+
+What changed:
+
+- Added a `Presentation mode` toggle to the Architecture map section.
+- In presentation mode, the UI hides secondary sections and turns the architecture map into the main full-width demo surface.
+- Keeps the Scenario launcher visible as a compact sticky control strip, so scenarios can still be triggered during demos.
+- Added Escape-key support to exit presentation mode quickly.
+- Updated README to mention Presentation mode.
+
+Why:
+
+- The project is now good enough to demo, so the architecture needs a cleaner mode for screenshots, recordings, and live explanations.
+- This keeps the normal learning UI intact while giving us a more focused presentation surface.
+
+Validation:
+
+- Ran `python3 -m compileall services/ui/main.py`.
+- Parsed the inline browser JavaScript with `node --check`.
+- Rebuilt and restarted `ui-service`.
+- Confirmed `http://127.0.0.1:18082/health` returns OK.
+- Confirmed the rendered page contains `Presentation mode`, `presentation-mode`, `Architecture map`, and `AI investigation layer`.
+- Triggered the `normal` scenario through the UI API and received a successful checkout response.
+
+Notes / follow-ups:
+
+- A future version could add one-click screenshot guidance or a “record demo script” panel.
+
 ## Next Best Steps
 
 Recommended next steps:

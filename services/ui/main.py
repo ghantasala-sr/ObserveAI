@@ -1103,6 +1103,82 @@ HTML = """
       color: var(--accent-2);
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
+    body.presentation-mode header {
+      padding-top: 12px;
+      padding-bottom: 10px;
+    }
+    body.presentation-mode .brand p {
+      display: none;
+    }
+    body.presentation-mode main {
+      display: block;
+      padding: 10px clamp(12px, 2vw, 28px) 24px;
+    }
+    body.presentation-mode .intro,
+    body.presentation-mode .service-section,
+    body.presentation-mode .trace-section,
+    body.presentation-mode .ai-section,
+    body.presentation-mode .event-section {
+      display: none;
+    }
+    body.presentation-mode .workspace {
+      gap: 12px;
+      width: 100%;
+    }
+    body.presentation-mode .scenario-section {
+      position: sticky;
+      top: 8px;
+      z-index: 40;
+      background: rgba(7,9,14,.88);
+      backdrop-filter: blur(16px);
+    }
+    body.presentation-mode .scenario-section .section-head {
+      padding: 12px 16px;
+    }
+    body.presentation-mode .scenario-section .section-head p {
+      display: none;
+    }
+    body.presentation-mode .scenario-grid {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding: 12px 14px 14px;
+      scroll-snap-type: x proximity;
+    }
+    body.presentation-mode .scenario {
+      flex: 0 0 190px;
+      min-height: 78px;
+      padding: 12px;
+      scroll-snap-align: start;
+    }
+    body.presentation-mode .scenario span {
+      font-size: 11px;
+      line-height: 1.35;
+    }
+    body.presentation-mode .architecture-section {
+      min-height: calc(100svh - 190px);
+    }
+    body.presentation-mode .architecture-section .section-head {
+      padding: 14px 18px;
+    }
+    body.presentation-mode .architecture-section .section-head h3::after {
+      content: " · presentation mode";
+      color: var(--accent-2);
+      font-size: 12px;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    body.presentation-mode .system-map {
+      min-height: calc(100svh - 290px);
+      padding: 16px;
+    }
+    body.presentation-mode .map-stage {
+      min-height: 680px;
+      grid-template-columns: minmax(210px, .8fr) minmax(300px, 1.12fr) minmax(250px, .96fr);
+    }
+    body.presentation-mode .map-card {
+      border-radius: 22px;
+    }
     @keyframes rise {
       from { opacity: 0; transform: translateY(16px); }
       to { opacity: 1; transform: translateY(0); }
@@ -1133,6 +1209,10 @@ HTML = """
       .node { grid-column: auto !important; grid-row: auto !important; min-height: 78px; }
       .rail { display: none; }
       .map-stage { grid-template-columns: 1fr; min-height: auto; }
+      body.presentation-mode .map-stage {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
       .entry-card, .sync-card, .kafka-card, .consumer-card, .storage-card, .observe-card {
         grid-column: auto;
         grid-row: auto;
@@ -1181,7 +1261,7 @@ HTML = """
     </aside>
 
     <div class="workspace">
-      <section>
+      <section class="service-section">
         <div class="section-head">
           <div>
             <h3>Service status</h3>
@@ -1191,7 +1271,7 @@ HTML = """
         <div class="services" id="services"></div>
       </section>
 
-      <section>
+      <section class="scenario-section">
         <div class="section-head">
           <div>
             <h3>Scenario launcher</h3>
@@ -1202,12 +1282,13 @@ HTML = """
         <div class="scenario-grid" id="scenarios"></div>
       </section>
 
-      <section>
+      <section class="architecture-section">
         <div class="section-head">
           <div>
             <h3>Architecture map</h3>
             <p>HTTP checkout path, Kafka event bus, async consumers, and SigNoz observability plane.</p>
           </div>
+          <button class="button primary" id="presentation-toggle" type="button">Presentation mode</button>
         </div>
         <div class="system-map">
           <div class="map-legend">
@@ -1316,7 +1397,7 @@ HTML = """
         </div>
       </section>
 
-      <section>
+      <section class="trace-section">
         <div class="section-head">
           <div>
             <h3>Trace helper</h3>
@@ -1331,7 +1412,7 @@ HTML = """
         </div>
       </section>
 
-      <section>
+      <section class="ai-section">
         <div class="section-head">
           <div>
             <h3>AI investigation layer</h3>
@@ -1374,7 +1455,7 @@ HTML = """
         </div>
       </section>
 
-      <section>
+      <section class="event-section">
         <div class="section-head">
           <div>
             <h3>Event trail</h3>
@@ -1596,6 +1677,7 @@ HTML = """
     const flowReadoutEl = document.querySelector("#flow-readout");
     const capturePanelEl = document.querySelector("#capture-panel");
     const traceHelperEl = document.querySelector("#trace-helper");
+    const presentationToggleEl = document.querySelector("#presentation-toggle");
 
     function pretty(name) {
       return name.replaceAll("_", " ").replace(/\\b\\w/g, c => c.toUpperCase());
@@ -1608,6 +1690,20 @@ HTML = """
       row.innerHTML = `<time>${now.toLocaleTimeString()}</time><div><code>${label}</code><br>${detail}</div>`;
       eventsEl.prepend(row);
       lastCodeEl.textContent = code;
+    }
+
+    function setPresentationMode(enabled) {
+      document.body.classList.toggle("presentation-mode", enabled);
+      if (presentationToggleEl) {
+        presentationToggleEl.textContent = enabled ? "Exit presentation" : "Presentation mode";
+        presentationToggleEl.classList.toggle("primary", !enabled);
+      }
+      if (enabled) {
+        document.querySelector(".architecture-section")?.scrollIntoView({behavior: "smooth", block: "start"});
+        addEvent("presentation", "Architecture presentation mode enabled. Press Escape to exit.", "on");
+      } else {
+        addEvent("presentation", "Presentation mode disabled.", "off");
+      }
     }
 
     function escapeHtml(value) {
@@ -1808,6 +1904,14 @@ LIMIT 100;`;
 
     document.querySelector("#refresh").addEventListener("click", refreshServices);
     document.querySelector("#seed-cart").addEventListener("click", seedCart);
+    presentationToggleEl?.addEventListener("click", () => {
+      setPresentationMode(!document.body.classList.contains("presentation-mode"));
+    });
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && document.body.classList.contains("presentation-mode")) {
+        setPresentationMode(false);
+      }
+    });
     renderScenarios();
     refreshServices();
     addEvent("ready", "ObserveAI UI loaded. Trigger a scenario and open SigNoz.");

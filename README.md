@@ -100,6 +100,7 @@ Use it to:
 - check service health
 - trigger demo scenarios
 - inspect the pictorial architecture map across HTTP, Kafka/Redpanda, async consumers, storage, OpenTelemetry, and SigNoz
+- use Presentation mode for a clean full-width architecture demo surface
 - watch each scenario animate through the architecture as HTTP packets, Kafka events, and OTLP telemetry pulses
 - see how each scenario maps to traces, metrics, dashboards, and alerts
 - use the Trace Helper to inspect the latest scenario, order id, likely bottleneck, SigNoz checklist, dashboard hint, alert candidate, and copyable ClickHouse query

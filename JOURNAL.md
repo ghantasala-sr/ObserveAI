@@ -801,7 +801,7 @@ Notes / follow-ups:
 
 ## 2026-07-12 - Add Architecture Presentation Mode
 
-Commit: pending until pushed
+Commit: `de84edc Add architecture presentation mode`
 
 What changed:
 

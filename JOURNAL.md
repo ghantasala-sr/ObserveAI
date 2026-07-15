@@ -829,6 +829,35 @@ Notes / follow-ups:
 
 - A future version could add one-click screenshot guidance or a “record demo script” panel.
 
+## 2026-07-15 - Pre-Event Blog Challenge Draft
+
+Commit: pending until pushed
+
+What changed:
+
+- Added `BLOG_CHALLENGE_OBSERVEAI.md`.
+- Drafted a pre-event blog for the WeMakeDevs x SigNoz blog challenge.
+- Positioned ObserveAI as a learning project built before the hackathon to understand observability hands-on.
+- Centered the blog around the SigNoz feature that felt most useful: distributed traces.
+- Covered self-hosting SigNoz, sending telemetry, traces, logs, metrics, dashboards, alerts, MCP practice, and next hackathon direction.
+- Added an AI assistance disclosure section for hackathon transparency.
+
+Why:
+
+- The pre-event challenge asks participants to self-host SigNoz, send data, explore features, and write about a favorite feature.
+- This blog tells the honest story of starting with limited observability exposure and learning by building ObserveAI.
+
+Validation:
+
+- Reviewed the draft for project accuracy against `README.md` and `JOURNAL.md`.
+- Confirmed the draft includes project links, screenshot suggestions, and AI assistance disclosure.
+
+Notes / follow-ups:
+
+- Add screenshots before publishing: ObserveAI UI, SigNoz services, one trace, one dashboard panel, and one alert/query panel.
+- Decide publishing platform: Substack, Hashnode, Dev.to, or personal blog.
+- After publishing, submit the public blog link through the challenge form.
+
 ## Next Best Steps
 
 Recommended next steps:

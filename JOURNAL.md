@@ -831,7 +831,7 @@ Notes / follow-ups:
 
 ## 2026-07-15 - Pre-Event Blog Challenge Draft
 
-Commit: pending until pushed
+Commit: `8e6cf2f Add ObserveAI blog challenge draft`
 
 What changed:
 
